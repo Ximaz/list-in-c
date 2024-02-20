@@ -1,0 +1,7 @@
+a.out
+*.o
+*.so
+*.a
+*.gcno
+*.gcda
+unit_tests
