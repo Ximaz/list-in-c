@@ -182,6 +182,11 @@ void list_slice_into(list_t const *list, size_t from, size_t to,
     list_t *output);
 
 /**
+ * @brief Function usd to duplicate the memory of an element
+ */
+typedef void *(*list_copy_t)(void const *elem);
+
+/**
  * @brief Copies the current list into a new allocated one
  *
  * @param[in] list
@@ -195,6 +200,23 @@ list_t *list_copy(list_t const *list);
  * @param[out] output
  */
 void list_copy_into(list_t const *list, list_t *output);
+
+/**
+ * @brief Deeply copies the current list into a new allocated one
+ *
+ * @param[in] list
+ * @param[in] copy the copy function used to duplicate elements
+ */
+list_t *list_deep_copy(list_t const *list, list_copy_t copy);
+
+/**
+ * @brief Deeply copies the current list into the output one
+ *
+ * @param[in] list
+ * @param[in] copy the copy function used to duplicate elements
+ * @param[out] output
+ */
+void list_deep_copy_into(list_t const *list, list_copy_t copy, list_t *output);
 
 /* Functionnal functions */
 
