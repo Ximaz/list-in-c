@@ -1,0 +1,31 @@
+#include <stdlib.h>
+#include <string.h>
+#include <criterion/criterion.h>
+#include <criterion/new/assert.h>
+#include "list.h"
+
+static void destroy_elem(void *elem)
+{
+    free(elem);
+}
+
+static int my_strcmp(void const *s1, void const *s2)
+{
+    return strcmp((char const *) s1, (char const *) s2);
+}
+
+Test(list_index_of, test_impl)
+{
+    list_t *list = list_new(&destroy_elem);
+
+    list_insert_at(list, strdup("This is my head !"), 0);
+    list_insert_at(list, strdup("This is my tail !"), 1);
+    list_insert_at(list, strdup("This is my tail 2-1 !"), -1);
+    list_insert_at(list, strdup("This is my tail 2 !"), 2);
+    cr_assert(eq(int, 0, list_index_of(list, "This is my head !", my_strcmp)));
+    cr_assert(eq(int, 1, list_index_of(list, "This is my tail !", my_strcmp)));
+    cr_assert(eq(int, 2, list_index_of(list, "This is my tail 2 !", my_strcmp)));
+    cr_assert(eq(int, 3, list_index_of(list, "This is my tail 2-1 !", my_strcmp)));
+    cr_assert(eq(int, -1, list_index_of(list, "Invalid Element", my_strcmp)));
+    list_destroy(list);
+}

@@ -1,23 +1,40 @@
 #ifndef __LIST_H_
     #define __LIST_H_
     #include <stddef.h>
+    #define __PRIVATE
+
+/**
+ * @brief Function used upon element destruction for custom memory release
+ *
+ * @param[in] elem
+ */
+typedef void (*list_elem_destroy_t)(void *elem);
 
 typedef struct s_list_elem {
     void *elem;
-    struct s_list *prev;
-    struct s_list *next;
+    struct s_list_elem *prev;
+    struct s_list_elem *next;
 } list_elem_t;
 
 typedef struct s_list {
-    size_t count;
-    list_elem_t *elems;
+    int count;
+    list_elem_destroy_t destroy;
+    list_elem_t *elems_head;
+    list_elem_t *elems_tail;
 } list_t;
 
 /* Constructor & Destructor */
 
-list_t *list_new(void);
+list_t *list_new(list_elem_destroy_t destroy);
 
-void list_destroy(void);
+void list_destroy(list_t *list);
+
+/* Private methods */
+
+__PRIVATE void list_elem_destroy(list_elem_t **elem,
+    list_elem_destroy_t destroy);
+
+__PRIVATE void list_elems_destroy(list_t *list);
 
 /* Getters */
 
@@ -26,7 +43,7 @@ void list_destroy(void);
  *
  * @param[in] list
  */
-size_t list_count(list_t const *list);
+int list_count(list_t const *list);
 
 /**
  * @brief This function type will be used to compare two elements
@@ -37,7 +54,7 @@ size_t list_count(list_t const *list);
  * @param[in] expected the element to find the index of
  * @param[in] elem the current element
  */
-typedef int (*list_index_of_cmp_t)(void *expected, void *elem);
+typedef int (*list_index_of_cmp_t)(void const *expected, void const *elem);
 
 /**
  * @brief Returns the index of an element
@@ -46,7 +63,8 @@ typedef int (*list_index_of_cmp_t)(void *expected, void *elem);
  * @param[in] elem
  * @param[in] cmp the function to compare elements with
  */
-size_t list_index_of(list_t const *list, void *elem, list_index_of_cmp_t cmp);
+int list_index_of(list_t const *list, void const *elem,
+    list_index_of_cmp_t cmp);
 
 /**
  * @brief Returns the element for the given index, or NULL if Out-Of-Range
@@ -54,7 +72,7 @@ size_t list_index_of(list_t const *list, void *elem, list_index_of_cmp_t cmp);
  * @param[in] list
  * @param[in] index
  */
-void *list_value_at(list_t const *list, size_t index);
+void *list_value_at(list_t const *list, int index);
 
 /* Insertion */
 
@@ -65,8 +83,9 @@ void *list_value_at(list_t const *list, size_t index);
  *
  * @param[in] list
  * @param[in] elem
+ * @return 0 on success, -1 on error
  */
-void list_push_front(list_t *list, void *elem);
+int list_push_front(list_t *list, void *elem);
 
 /**
  * @brief Pushes an element at the given index of the list.
@@ -77,7 +96,7 @@ void list_push_front(list_t *list, void *elem);
  * @param[in] elem
  * @return 0 on success, -1 on error (Out-Of-Range)
  */
-int list_insert_at(list_t *list, void *elem, size_t index);
+int list_insert_at(list_t *list, void *elem, int index);
 
 /**
  * @brief Pushes an element at the back of the list
@@ -86,8 +105,9 @@ int list_insert_at(list_t *list, void *elem, size_t index);
  *
  * @param[in] list
  * @param[in] elem
+ * @return 0 on success, -1 on error
  */
-void list_push_back(list_t *list, void *elem);
+int list_push_back(list_t *list, void *elem);
 
 /* Suppression */
 
@@ -111,7 +131,7 @@ void *list_pop_front(list_t *list);
  * @param[in] elem
  * @return the pop'd element if any, NULL otherwise
  */
-void *list_remove_at(list_t *list, size_t index);
+void *list_remove_at(list_t *list, int index);
 
 /**
  * @brief Pops an element from the back of the list
@@ -127,17 +147,13 @@ void *list_pop_back(list_t *list);
 /* Operations */
 
 /**
- * @brief Function used to deallocate an element of the list
- */
-typedef void (*list_clear_t)(void *elem);
-
-/**
  * @brief Removes all the elements of the list
  *
+ * Uses the list_elem_destroy_t function passed upon initialization
+ *
  * @param[in] list
- * @param[in] clear [OPT] if specified, called on all elements
  */
-void list_clear(list_t *list, list_clear_t clear);
+void list_clear(list_t *list);
 
 /**
  * @brief Reverse the current list by allocating a new one
@@ -168,7 +184,7 @@ void list_reverse_into(list_t const *list, list_t *output);
  * @param[in] from
  * @param[in] to (excluded)
  */
-list_t *list_slice(list_t const *list, size_t from, size_t to);
+list_t *list_slice(list_t const *list, int from, int to);
 
 /**
  * @brief Slices a list from 'from' to 'to' (excluded) into the output list
@@ -178,11 +194,13 @@ list_t *list_slice(list_t const *list, size_t from, size_t to);
  * @param[in] to (excluded)
  * @param[out] output
  */
-void list_slice_into(list_t const *list, size_t from, size_t to,
+void list_slice_into(list_t const *list, int from, int to,
     list_t *output);
 
 /**
  * @brief Function usd to duplicate the memory of an element
+ *
+ * @param[in] elem
  */
 typedef void *(*list_copy_t)(void const *elem);
 
@@ -216,7 +234,8 @@ list_t *list_deep_copy(list_t const *list, list_copy_t copy);
  * @param[in] copy the copy function used to duplicate elements
  * @param[out] output
  */
-void list_deep_copy_into(list_t const *list, list_copy_t copy, list_t *output);
+void list_deep_copy_into(list_t const *list, list_copy_t copy,
+    list_t *output);
 
 /* Functionnal functions */
 

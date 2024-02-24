@@ -22,7 +22,7 @@ VALGRIND_FLAGS	:=	-s							\
 RM				:=	rm -rf
 
 tests/%.o:	tests/%.c
-	$(CC) $(TESTS_CFLAGS) $(CPPFLAGS) -o $@ -c $< -lcriterion
+	$(CC) $(TESTS_CFLAGS) $(CPPFLAGS) -o $@ -c $<
 
 all:	$(NAME)
 
