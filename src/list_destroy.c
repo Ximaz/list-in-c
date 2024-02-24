@@ -3,6 +3,6 @@
 
 void list_destroy(list_t *list)
 {
-    list_elems_destroy(list);
+    list_clear(list);
     free(list);
 }

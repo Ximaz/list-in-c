@@ -1,7 +1,7 @@
 #ifndef __LIST_H_
     #define __LIST_H_
+
     #include <stddef.h>
-    #define __PRIVATE
 
 /**
  * @brief Function used upon element destruction for custom memory release
@@ -28,10 +28,6 @@ typedef struct s_list {
 list_t *list_new(list_elem_destroy_t destroy);
 
 void list_destroy(list_t *list);
-
-/* Private methods */
-
-__PRIVATE void list_elems_destroy(list_t *list);
 
 /* Getters */
 
