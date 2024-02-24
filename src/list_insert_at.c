@@ -21,7 +21,7 @@ int list_insert_at(list_t *list, void *elem, int index)
     if ((0 > index && 0 == list->count) || index > list->count)
         return -1;
     if (0 > index)
-        index = list->count + index + 1;
+        index += list->count + 1;
     if (0 == index)
         return list_push_front(list, elem);
     if (index == list->count)

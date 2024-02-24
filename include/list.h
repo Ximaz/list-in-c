@@ -31,9 +31,6 @@ void list_destroy(list_t *list);
 
 /* Private methods */
 
-__PRIVATE void list_elem_destroy(list_elem_t **elem,
-    list_elem_destroy_t destroy);
-
 __PRIVATE void list_elems_destroy(list_t *list);
 
 /* Getters */
