@@ -30,5 +30,8 @@ int list_insert_at(list_t *list, void *elem, int index)
         e = e->next;
         --index;
     }
-    return list_elem_insert(e->prev, elem);
+    if (-1 == list_elem_insert(e->prev, elem))
+        return -1;
+    ++list->count;
+    return 0;
 }
