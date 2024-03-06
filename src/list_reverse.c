@@ -1,30 +1,18 @@
 #include "list.h"
 
-static void list_elem_swap(list_elem_t *head, list_elem_t *tail)
-{
-    list_elem_t *head_next = head->next;
-    list_elem_t *head_prev = head->prev;
-
-    head->next = tail->next;
-    head->prev = tail->prev;
-    tail->next = head_next;
-    tail->prev = head_prev;
-}
-
 void list_reverse_itself(list_t *list)
 {
     int i = 0;
-    list_elem_t *next_head = NULL;
-    list_elem_t *prev_tail = NULL;
+    void *elem = NULL;
     list_elem_t *head = list->elems_head;
     list_elem_t *tail = list->elems_tail;
 
     for (; i < list->count / 2; ++i) {
-        next_head = head->next;
-        prev_tail = tail->prev;
-        list_elem_swap(head, tail);
-        head = next_head;
-        tail = prev_tail;
+        elem = head->elem;
+        head->elem = tail->elem;
+        tail->elem = elem;
+        head = head->next;
+        tail = tail->prev;
     }
 }
 

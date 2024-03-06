@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <criterion/criterion.h>
 #include <criterion/new/assert.h>
@@ -6,7 +5,6 @@
 
 static int my_strcmp(void const *s1, void const *s2)
 {
-    printf("s1: %s s2: %s\n", (char const *) s1, (char const *) s2);
     return strcmp((char const *) s1, (char const *) s2);
 }
 
