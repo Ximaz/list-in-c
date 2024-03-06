@@ -47,7 +47,7 @@ int list_count(list_t const *list);
  * @param[in] expected the element to find the index of
  * @param[in] elem the current element
  */
-typedef int (*list_index_of_cmp_t)(void const *expected, void const *elem);
+typedef int (*list_equal_cmp_t)(void const *expected, void const *elem);
 
 /**
  * @brief Returns the index of an element
@@ -56,8 +56,7 @@ typedef int (*list_index_of_cmp_t)(void const *expected, void const *elem);
  * @param[in] elem
  * @param[in] cmp the function to compare elements with
  */
-int list_index_of(list_t const *list, void const *elem,
-    list_index_of_cmp_t cmp);
+int list_index_of(list_t const *list, void const *elem, list_equal_cmp_t cmp);
 
 /**
  * @brief Returns the element for the given index, or NULL if Out-Of-Range
@@ -66,6 +65,21 @@ int list_index_of(list_t const *list, void const *elem,
  * @param[in] index
  */
 void *list_value_at(list_t const *list, int index);
+
+/* Operators */
+
+/**
+ * @brief Compares the element of each list to check if they are the same.
+ *
+ * If the compare function is equal to NULL, then elements will be determined
+ * equal based on their memory address.
+ *
+ * @param[in] list1
+ * @param[in] list2
+ * @param[in] cmp the function to compare elements with (may be NULL)
+ * @return 1 if equal, 0 otherwise
+ */
+int list_equal(list_t const *list1, list_t const *list2, list_equal_cmp_t cmp);
 
 /* Insertion */
 
@@ -152,6 +166,7 @@ void list_clear(list_t *list);
  * @brief Reverse the current list by allocating a new one
  *
  * @param[in] list
+ * @return the reversed list in success, NULL otherwise
  */
 list_t *list_reverse(list_t const *list);
 
@@ -167,8 +182,9 @@ void list_reverse_itself(list_t *list);
  *
  * @param[in] list
  * @param[out] output
+ * @return 0 on success, -1 otherwise
  */
-void list_reverse_into(list_t const *list, list_t *output);
+int list_reverse_into(list_t const *list, list_t *output);
 
 /**
  * @brief Slices a list from 'from' to 'to' (excluded) into a new allocated one

@@ -3,14 +3,9 @@
 #include <criterion/new/assert.h>
 #include "list.h"
 
-static void destroy_elem(void *elem)
-{
-    free(elem);
-}
-
 Test(list_value_at, test_impl)
 {
-    list_t *list = list_new(&destroy_elem);
+    list_t *list = list_new(&free);
 
     cr_assert(eq(ptr, NULL, list_value_at(list, -1)));
     cr_assert(eq(int, 0, list_insert_at(list, strdup("This is my head !"), 0)));

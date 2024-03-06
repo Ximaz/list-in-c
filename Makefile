@@ -1,4 +1,3 @@
-NAME			:=	c_spice
 CC				:=	gcc
 CPPFLAGS		:=	-Iinclude/
 

@@ -4,16 +4,11 @@
 #include <criterion/new/assert.h>
 #include "list.h"
 
-static void destroy_elem(void *elem)
-{
-    free(elem);
-}
-
 Test(list_pop_back, test_impl)
 {
     char *s1 = NULL;
     char *s2 = NULL;
-    list_t *list = list_new(&destroy_elem);
+    list_t *list = list_new(&free);
 
     cr_assert(eq(int, 0, list_push_back(list, strdup("Hello, World !"))));
     cr_assert(eq(int, 0, list_push_back(list, strdup("This is my tail !"))));
@@ -33,7 +28,7 @@ Test(list_pop_front, test_impl)
 {
     char *s1 = NULL;
     char *s2 = NULL;
-    list_t *list = list_new(&destroy_elem);
+    list_t *list = list_new(&free);
 
     cr_assert(eq(int, 0, list_push_back(list, strdup("This is my head !"))));
     cr_assert(eq(int, 0, list_push_back(list, strdup("Hello, World !"))));
@@ -56,7 +51,7 @@ Test(list_remove_at, test_impl)
     char *s3 = NULL;
     char *s4 = NULL;
     char *s5 = NULL;
-    list_t *list = list_new(&destroy_elem);
+    list_t *list = list_new(&free);
 
     cr_assert(eq(ptr, NULL, list_remove_at(list, -1)));
     cr_assert(eq(ptr, NULL, list_remove_at(list, 1)));

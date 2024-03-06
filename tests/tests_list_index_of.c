@@ -4,11 +4,6 @@
 #include <criterion/new/assert.h>
 #include "list.h"
 
-static void destroy_elem(void *elem)
-{
-    free(elem);
-}
-
 static int my_strcmp(void const *s1, void const *s2)
 {
     return strcmp((char const *) s1, (char const *) s2);
@@ -16,7 +11,7 @@ static int my_strcmp(void const *s1, void const *s2)
 
 Test(list_index_of, test_impl)
 {
-    list_t *list = list_new(&destroy_elem);
+    list_t *list = list_new(&free);
 
     cr_assert(eq(int, 0, list_insert_at(list, strdup("This is my head !"), 0)));
     cr_assert(eq(int, 0, list_insert_at(list, strdup("This is my tail !"), 1)));
