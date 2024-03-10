@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2024
+## List in C
+## File description:
+## Makefile
+##
+
 CC				:=	gcc
 NAME			:=	liblist.so
 CPPFLAGS		:=	-Iinclude/

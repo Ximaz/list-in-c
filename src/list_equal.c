@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2024
+** List in C
+** File description:
+** list_equal.c
+*/
+
 #include "list.h"
 
 static int list_equal_address(list_elem_t const *head1,

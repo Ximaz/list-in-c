@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2024
+** List in C
+** File description:
+** list_pop_back.c
+*/
+
 #include <stdlib.h>
 #include "list.h"
 

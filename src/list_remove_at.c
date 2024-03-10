@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2024
+** List in C
+** File description:
+** list_remove_at.c
+*/
+
 #include <stdlib.h>
 #include "list.h"
 

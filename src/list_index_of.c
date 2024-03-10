@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2024
+** List in C
+** File description:
+** list_index_of.c
+*/
+
 #include "list.h"
 
 int list_index_of(list_t const *list, void const *elem, list_equal_cmp_t cmp)

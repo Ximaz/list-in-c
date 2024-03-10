@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2024
+** Tests of List in C
+** File description:
+** tests_pop_and_remove.c
+*/
+
 #include <stdlib.h>
 #include <string.h>
 #include <criterion/criterion.h>

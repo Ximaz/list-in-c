@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2024
+** List in C
+** File description:
+** list_reverse.c
+*/
+
 #include "list.h"
 
 void list_reverse_itself(list_t *list)

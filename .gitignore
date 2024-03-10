@@ -4,4 +4,6 @@ a.out
 *.a
 *.gcno
 *.gcda
+*.log
 unit_tests
+liblist.so

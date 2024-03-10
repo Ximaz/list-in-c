@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2024
+** List in C
+** File description:
+** list.h
+*/
+
 #ifndef __LIST_H_
     #define __LIST_H_
 
