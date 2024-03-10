@@ -1,7 +1,7 @@
 name: "ci"
 
 env:
-    ARTIFACT: "main"
+    ARTIFACT: "liblist.so"
     MAIN_BRANCH: "main"
 
 on:
