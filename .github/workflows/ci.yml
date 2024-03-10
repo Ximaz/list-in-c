@@ -6,7 +6,7 @@ on:
 
 jobs:
     basics:
-        if: "${{ github.event.ref }} != ${{ github.event.repository.default_branch }}"
+        if: "${{ github.ref_name }} != ${{ github.event.repository.default_branch }}"
         runs-on: "ubuntu-latest"
         container:
             image: "ghcr.io/epitech/coding-style-checker:latest"
@@ -75,7 +75,7 @@ jobs:
                 run: "[[ $(make ${{ vars.ARTIFACT }}) == \"\" ]] && exit 1 || echo 0"
 
     run-tests:
-        if: "${{ github.event.ref }} != ${{ github.event.repository.default_branch }}"
+        if: "${{ github.ref_name }} != ${{ github.event.repository.default_branch }}"
         runs-on: "ubuntu-latest"
         container:
             image: "epitechcontent/epitest-docker:latest"
