@@ -1,0 +1,114 @@
+name: "ci"
+
+env:
+    ARTIFACT: "main"
+    MAIN_BRANCH: "main"
+
+on:
+    push:
+        branches-ignore:
+            -   "main"
+
+    pull_request:
+        branches-ignore:
+            -   "main"
+
+jobs:
+    basics:
+        runs-on: "ubuntu-latest"
+        container:
+            image: "ghcr.io/epitech/coding-style-checker:latest"
+        steps:
+            -   name: "Checkout"
+                uses: "actions/checkout@v4.1.1"
+                with:
+                    fetch-depth: 0
+
+            -   name: "Temporary files"
+                run: "[[ $(find . -type f \\( -name '${{ env.ARTIFACT }}' -o -name '*.o' -o -name '*.log' -o -name '.env' -o -name '*.so' -o -name '*.a' -o -name '*.gcno' -o -name '*.gcda' \\)) == \"\" ]] && exit 0 || exit 1"
+
+            -   name: "Check coding style"
+                run: "/usr/local/bin/check.sh $(pwd) $(pwd)"
+
+            -   name: "Annotate coding-style errors"
+                run: |
+                    status=0
+                    while IFS= read -r line; do
+                        file=$(echo "${line}" | cut -d ':' -f1)
+                        pos=$(echo "${line}" | cut -d ':' -f2)
+                        type=$(echo "${line}" | cut -d ':' -f3)
+                        csid=$(echo "${line}" | cut -d ':' -f4)
+
+                        [[ "${type:1}" == "illegal"* ]] && continue
+                        echo "::error file=${file},line=${pos},title=${type:1} ${csid}::${type:1}: ${csid} at ${file}:${pos}"
+                        status=1
+                    done < coding-style-reports.log
+                    rm -f coding-style-reports.log
+                    exit "${status}"
+
+            -   name: "Checking make on it's own"
+                timeout-minutes: 1
+                run: "make && [[ -f \"${{ env.ARTIFACT }}\" ]] && exit 0 || exit 1"
+
+            -   name: "Checking for make relink on it's own"
+                timeout-minutes: 1
+                run: "[[ $(make) == \"\" ]] && exit 1 || echo 0"
+
+            -   name: "Checking 'all' rule"
+                timeout-minutes: 1
+                run: "make all && [[ -f \"${{ env.ARTIFACT }}\" ]] && exit 0 || exit 1"
+
+            -   name: "Checking for 'all' make relink"
+                timeout-minutes: 1
+                run: "[[ $(make all) == \"\" ]] && exit 1 || echo 0"
+
+            -   name: "Checking 'clean' rule"
+                timeout-minutes: 1
+                run: "make clean && echo $(find . -type d -name '.git' -prune -o \\( -type f \\( -name '*.o' -o -name '.env' -o -name '*.log' -o -name '*.gcno' -o -name '*.gcda' \\) \\) -print) && echo $(find . -type d -name '.git' -prune -o \\( -type f -name '${{ env.ARTIFACT  }}' \\) -print) && [[ $(find . -type d -name '.git' -prune -o \\( -type f \\( -name '*.o' -o -name '.env' -o -name '*.log' -o -name '*.gcno' -o -name '*.gcda' \\) \\) -print) == \"\" ]] && [[ $(find . -type d -name '.git' -prune -o \\( -type f -name '${{ env.ARTIFACT  }}' \\) -print) != \"\" ]] && exit 0 || exit 1"
+
+            -   name: "Checking 'fclean' rule"
+                timeout-minutes: 1
+                run: "make && make fclean && [[ $(find . -type d -name '.git' -prune -o \\( -type f \\( -name '${{ env.ARTIFACT }}' -o -name '*.o' -o -name '*.log' -o -name '.env' -o -name '*.so' -o -name '*.a' -o -name '*.gcno' -o -name '*.gcda' \\) \\) -print) == \"\" ]] && exit 0 || exit 1"
+
+            -   name: "Checking 're' rule"
+                timeout-minutes: 1
+                run: "make re && [[ -f \"${{ env.ARTIFACT }}\" ]] && exit 0 || exit 1"
+
+            -   name: "Checking the artifact rule"
+                timeout-minutes: 1
+                run: "make ${{ env.ARTIFACT }} && [[ -f \"${{ env.ARTIFACT }}\" ]] && exit 0 || exit 1"
+
+            -   name: "Checking for the artifact make relink"
+                timeout-minutes: 1
+                run: "[[ $(make ${{ env.ARTIFACT }}) == \"\" ]] && exit 1 || echo 0"
+
+    run-tests:
+        runs-on: "ubuntu-latest"
+        container:
+            image: "epitechcontent/epitest-docker:latest"
+        steps:
+            -   name: "Checkout"
+                uses: "actions/checkout@v4.1.1"
+                with:
+                    fetch-depth: 0
+
+            -   name: "Run tests"
+                timeout-minutes: 1
+                run: "[[ $(grep -E \"^tests_run:\" Makefile) == \"\" ]] && exit 0 || make tests_run"
+
+    merge-branch:
+        needs:
+            -   "basics"
+            -   "run-tests"
+        if: "${{ github.event_name == 'push' }}"
+        runs-on: "ubuntu-latest"
+        steps:
+            -   name: "Checkout"
+                uses: "actions/checkout@v4.1.1"
+                with:
+                    fetch-depth: 0
+
+            -   name: "Push all commits"
+                env:
+                    GITHUB_TOKEN: "${{ secrets.PERSONNAL_ACCESS_TOKEN }}"
+                run: "git push origin ${{ github.ref_name }}:${{ env.MAIN_BRANCH }}"

@@ -1,8 +1,8 @@
 CC				:=	gcc
+NAME			:=	liblist.so
 CPPFLAGS		:=	-Iinclude/
 
-CFLAGS			:=	-g -Wall -Wextra -Werror -pedantic -ansi --coverage
-SRCS			:=	$(shell find . -type f ! -name 'tests_*.c' ! -name 'main.c' -name '*.c')
+SRCS			:=	$(shell find src -name '*.c')
 OBJS			:=	$(SRCS:.c=.o)
 
 TESTS_CFLAGS	:=	-g -Wall -Wextra -Werror
@@ -25,9 +25,11 @@ tests/%.o:	tests/%.c
 
 all:	$(NAME)
 
-$(NAME):	$(OBJS)
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJS) main.c -o $(NAME)
+$(NAME):	CFLAGS = -Wall -Wextra -Werror -pedantic -ansi
+$(NAME):	clean	$(OBJS)
+	$(CC) -shared -fPIC $(OBJS) -o $(NAME)
 
+tests_run:	CFLAGS = -g -Wall -Wextra -Werror -pedantic -ansi --coverage
 tests_run:	clean	$(OBJS)	$(TESTS_OBJS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJS) $(TESTS_OBJS) -o unit_tests -lcriterion
 	CRITERION_NO_EARLY_EXIT=1 ./unit_tests
