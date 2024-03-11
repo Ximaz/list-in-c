@@ -245,8 +245,9 @@ list_t *list_copy(list_t const *list);
  *
  * @param[in] list
  * @param[out] output
+ * @return 0 on success, -1 otherwise
  */
-void list_copy_into(list_t const *list, list_t *output);
+int list_copy_into(list_t const *list, list_t *output);
 
 /**
  * @brief Deeply copies the current list into a new allocated one
@@ -259,11 +260,15 @@ list_t *list_deep_copy(list_t const *list, list_copy_t copy);
 /**
  * @brief Deeply copies the current list into the output one
  *
+ * if the `copy` argument is NULL, the result of this function is the same as
+ * `list_copy_into`.
+ *
  * @param[in] list
  * @param[in] copy the copy function used to duplicate elements
  * @param[out] output
+ * @return 0 on success, -1 otherwise
  */
-void list_deep_copy_into(list_t const *list, list_copy_t copy,
+int list_deep_copy_into(list_t const *list, list_copy_t copy,
     list_t *output);
 
 /* Functionnal functions */

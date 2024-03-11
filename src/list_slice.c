@@ -33,7 +33,7 @@ int list_slice_into(list_t const *list, int from, int to, list_t *output)
 {
     list_elem_t *head = list->elems_head;
 
-    if (NULL == head || -1 == convert_indexes(list, &from, &to))
+    if (-1 == convert_indexes(list, &from, &to))
         return -1;
     head = move_to(head, from);
     while (NULL != head && from < to) {
@@ -92,7 +92,7 @@ static void destroy_list_head(list_t *list, int range)
 
 int list_slice_itself(list_t *list, int from, int to)
 {
-    if (NULL == list->elems_head || -1 == convert_indexes(list, &from, &to))
+    if (-1 == convert_indexes(list, &from, &to))
         return -1;
     destroy_list_tail(list, to);
     destroy_list_head(list, to - from);
