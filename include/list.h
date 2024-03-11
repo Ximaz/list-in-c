@@ -209,8 +209,9 @@ list_t *list_slice(list_t const *list, int from, int to);
  * @param[in] from
  * @param[in] to (excluded)
  * @param[out] output
+ * @return 0 on success, -1 otherwise (Out-Of-Range)
  */
-void list_slice_into(list_t const *list, int from, int to,
+int list_slice_into(list_t const *list, int from, int to,
     list_t *output);
 
 /**
