@@ -203,6 +203,18 @@ int list_reverse_into(list_t const *list, list_t *output);
 list_t *list_slice(list_t const *list, int from, int to);
 
 /**
+ * @brief Slices the current list itself, no allocation of any kind. All
+ * Out-Of-Range items that are not part of the list anymore are free'd using
+ * the destroy function if provided.
+ *
+ * @param[in] list
+ * @param[in] from
+ * @param[in] to (excluded)
+ * @return 0 on success, -1 otherwise, the list is unchanged (Out-Of-Range)
+ */
+int list_slice_itself(list_t *list, int from, int to);
+
+/**
  * @brief Slices a list from 'from' to 'to' (excluded) into the output list
  *
  * @param[in] list
