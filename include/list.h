@@ -252,10 +252,15 @@ int list_copy_into(list_t const *list, list_t *output);
 /**
  * @brief Deeply copies the current list into a new allocated one
  *
+ * if the destroy function is NULL, the destroy function of `list` is passed
+ * to the new list.
+ *
  * @param[in] list
  * @param[in] copy the copy function used to duplicate elements
+ * @param[in] destroy the destroy element function to pass to the new list
  */
-list_t *list_deep_copy(list_t const *list, list_copy_t copy);
+list_t *list_deep_copy(list_t const *list, list_copy_t copy,
+    list_elem_destroy_t destroy);
 
 /**
  * @brief Deeply copies the current list into the output one
