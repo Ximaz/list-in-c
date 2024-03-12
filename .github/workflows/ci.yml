@@ -158,6 +158,7 @@ jobs:
                     mkdir -p ~/.ssh
                     ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
                     git remote add mirror git@github.com:${{ VARS.MIRROR_URL }}.git
+                    git branch -M main
                     git push mirror main
                 env:
                     SSH_PRIVATE_KEY: "${{ secrets.SSH_PRIVATE_KEY }}"
