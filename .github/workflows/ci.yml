@@ -157,5 +157,5 @@ jobs:
                 uses: "yesolutions/mirror-action@master"
                 with:
                     REMOTE: "${{ vars.MIRROR_URL }}"
-                    GIT_SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-                    GIT_SSH_NO_VERIFY_HOST: "true"
+                    GIT_USERNAME: "Ximaz"
+                    GIT_PASSWORD: ${{ secrets.PERSONNAL_ACCESS_TOKEN }}
