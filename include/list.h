@@ -286,21 +286,26 @@ int list_deep_copy_into(list_t const *list, list_copy_t copy,
  */
 typedef void *(*list_map_t)(void const *elem);
 
+typedef list_elem_destroy_t list_map_destroy_t;
+
 /**
  * @brief Maps each elements of the list into a new allocated one
  *
  * @param[in] list
  * @param[in] map
+ * @param[in] destroy the function to destroy generated map elements
  */
-list_t *list_map(list_t const *list, list_map_t map);
+list_t *list_map(list_t const *list, list_map_t map,
+    list_map_destroy_t destroy);
 
 /**
  * @brief Maps each elements of the list into itself
  *
  * @param[in] list
  * @param[in] map
+ * @param[in] destroy the function to destroy generated map elements
  */
-void list_map_itself(list_t *list, list_map_t map);
+void list_map_itself(list_t *list, list_map_t map, list_map_destroy_t destroy);
 
 /**
  * @brief Maps each elements of the list into output

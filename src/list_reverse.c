@@ -7,20 +7,16 @@
 
 #include "list.h"
 
-void list_reverse_itself(list_t *list)
+int list_reverse_into(list_t const *list, list_t *output)
 {
-    int i = 0;
-    void *elem = NULL;
-    list_elem_t *head = list->elems_head;
+    int abort = 0;
     list_elem_t *tail = list->elems_tail;
 
-    for (; i < list->count / 2; ++i) {
-        elem = head->elem;
-        head->elem = tail->elem;
-        tail->elem = elem;
-        head = head->next;
+    while (NULL != tail && 0 == abort) {
+        abort = list_push_back(output, tail->elem);
         tail = tail->prev;
     }
+    return abort;
 }
 
 list_t *list_reverse(list_t const *list)
@@ -36,14 +32,18 @@ list_t *list_reverse(list_t const *list)
     return new_list;
 }
 
-int list_reverse_into(list_t const *list, list_t *output)
+void list_reverse_itself(list_t *list)
 {
-    int abort = 0;
+    int i = 0;
+    void *elem = NULL;
+    list_elem_t *head = list->elems_head;
     list_elem_t *tail = list->elems_tail;
 
-    while (NULL != tail && 0 == abort) {
-        abort = list_push_back(output, tail->elem);
+    for (; i < list->count / 2; ++i) {
+        elem = head->elem;
+        head->elem = tail->elem;
+        tail->elem = elem;
+        head = head->next;
         tail = tail->prev;
     }
-    return abort;
 }
