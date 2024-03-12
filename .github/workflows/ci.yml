@@ -154,4 +154,9 @@ jobs:
                     fetch-depth: 0
 
             -   name: "Mirror commits"
-                run: "git branch -M main && git remote add mirror https://Ximaz:${{ secrets.PERSONNAL_ACCESS_TOKEN }}github.com/${{ vars.MIRROR_URL}} && git push mirror main"
+                run: |
+                    ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
+                    git remote add mirror git@github.com:${{ VARS.MIRROR_URL }}.git
+                    git push mirror main
+                env:
+                    SSH_PRIVATE_KEY: "${{ secrets.SSH_PRIVATE_KEY }}"
