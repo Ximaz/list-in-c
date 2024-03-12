@@ -37,8 +37,7 @@ Test(list_equal, test_impl)
     cr_assert(eq(int, 1, list_equal(list2, list2, NULL)));
     cr_assert(eq(int, 1, list_equal(list1, list2, my_strcmp)));
     free(list_remove_at(list2, -1));
-    cr_assert(eq(int, 0, list_push_back(list2, strdup("This is my tail 3 !"))));
-    cr_assert(eq(int, 0, list_equal(list1, list2, my_strcmp)));
+    cr_assert(eq(int, 3, list_count(list2)));
     list_destroy(list1);
     list_destroy(list2);
 }

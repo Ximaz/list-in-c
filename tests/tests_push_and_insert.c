@@ -11,6 +11,11 @@
 #include <criterion/new/assert.h>
 #include "list.h"
 
+static int my_strcmp(void const *e1, void const *e2)
+{
+    return strcmp((char const *) e1, (char const *) e2);
+}
+
 Test(list_push_back, test_impl)
 {
     list_t *list = list_new(&free);
@@ -37,18 +42,20 @@ Test(list_push_front, test_impl)
 
 Test(list_insert_at, test_impl)
 {
-    list_t *list = list_new(&free);
+    list_t *list = list_new(NULL);
+    list_t *expected = list_new(NULL);
 
     cr_assert(eq(int, -1, list_insert_at(list, NULL, -1)));
     cr_assert(eq(int, -1, list_insert_at(list, NULL, 1)));
-    cr_assert(eq(int, 0, list_insert_at(list, strdup("This is my head !"), 0)));
-    cr_assert(eq(int, 0, list_insert_at(list, strdup("This is my tail !"), 1)));
-    cr_assert(eq(int, 0, list_insert_at(list, strdup("This is my tail 2-1 !"), -1)));
-    cr_assert(eq(int, 0, list_insert_at(list, strdup("This is my tail 2 !"), 2)));
-    cr_assert(eq(int, 4, list_count(list)));
-    cr_assert(eq(str, "This is my head !", list->elems_head->elem));
-    cr_assert(eq(str, "This is my tail !", list->elems_head->next->elem));
-    cr_assert(eq(str, "This is my tail 2 !", list->elems_head->next->next->elem));
-    cr_assert(eq(str, "This is my tail 2-1 !", list->elems_head->next->next->next->elem));
+    cr_assert(eq(int, 0, list_insert_at(list, "This is my head !", 0)));
+    cr_assert(eq(int, 0, list_insert_at(list, "This is my tail !", 1)));
+    cr_assert(eq(int, 0, list_insert_at(list, "This is my tail 2-1 !", -1)));
+    cr_assert(eq(int, 0, list_insert_at(list, "This is my tail 2 !", 2)));
+    cr_assert(eq(int, 0, list_push_back(expected, "This is my head !")));
+    cr_assert(eq(int, 0, list_push_back(expected, "This is my tail !")));
+    cr_assert(eq(int, 0, list_push_back(expected, "This is my tail 2-1 !")));
+    cr_assert(eq(int, 0, list_insert_at(expected, "This is my tail 2 !", 2)));
+    cr_assert(eq(int, 1, list_equal(list, expected, my_strcmp)));
     list_destroy(list);
+    list_destroy(expected);
 }

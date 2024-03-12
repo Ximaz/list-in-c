@@ -6,6 +6,7 @@
 */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "list.h"
 
 static void list_elem_remove(list_elem_t *e)
