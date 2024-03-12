@@ -153,10 +153,19 @@ jobs:
                 with:
                     fetch-depth: 0
 
-            -   name: "Mirror commits"
+            -   name: "Setup SSH private key"
                 run: |
                     mkdir -p ~/.ssh
+                    echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+                    chmod 600 ~/.ssh/id_ed25519
                     ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
+                    eval "$(ssh-agent -s)"
+                    ssh-add ~/.ssh/id_ed25519
+                    git config --global user.email "malo.durand@epitech.eu"
+                    git config --global user.name "DURAND Malo"
+
+            -   name: "Mirror commits"
+                run: |
                     git remote add mirror git@github.com:${{ VARS.MIRROR_URL }}.git
                     git branch -M main
                     git push mirror main
