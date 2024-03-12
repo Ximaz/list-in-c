@@ -154,4 +154,4 @@ jobs:
                     fetch-depth: 0
 
             -   name: "Mirror commits"
-                run: "git remote set-url mirror https://Ximaz:${{ secrets.PERSONNAL_ACCESS_TOKEN }}github.com/${{ vars.MIRROR_URL}} && git push mirror main"
+                run: "git remote add mirror https://Ximaz:${{ secrets.PERSONNAL_ACCESS_TOKEN }}github.com/${{ vars.MIRROR_URL}} && git push mirror main"
