@@ -153,21 +153,8 @@ jobs:
                 with:
                     fetch-depth: 0
 
-            -   name: "Setup SSH private key"
-                run: |
-                    mkdir -p ~/.ssh
-                    echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-                    chmod 600 ~/.ssh/id_ed25519
-                    ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
-                    eval "$(ssh-agent -s)"
-                    echo "${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}" | ssh-add -k -
-                    git config --global user.email "malo.durand@epitech.eu"
-                    git config --global user.name "DURAND Malo"
-
             -   name: "Mirror commits"
-                run: |
-                    git remote add mirror git@github.com:${{ VARS.MIRROR_URL }}.git
-                    git branch -M main
-                    git push mirror main
-                env:
-                    SSH_PRIVATE_KEY: "${{ secrets.SSH_PRIVATE_KEY }}"
+                uses: "pixta-dev/repository-mirroring-action@v1"
+                with:
+                    target_repo_url: "git@github.com:${{ vars.MIRROR_URL }}.git"
+                    ssh_private_key: "${{ secrets.SSH_PRIVATE_KEY }}"
