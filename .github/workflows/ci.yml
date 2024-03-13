@@ -48,8 +48,6 @@ on:
 jobs:
     check_prerequisites_artifact:
         runs-on: "ubuntu-latest"
-        outputs:
-            results: ${{ join(steps.*.outcome) }}
         steps:
             -   id: build-variables
                 continue-on-error: true
@@ -59,8 +57,6 @@ jobs:
 
     check_prerequisites_mirroring:
         runs-on: "ubuntu-latest"
-        outputs:
-            results: ${{ join(steps.*.outcome) }}
         steps:
             -   id: mirroring-check
                 continue-on-error: true
@@ -72,8 +68,6 @@ jobs:
 
     check_prerequisites_push_branch:
         runs-on: "ubuntu-latest"
-        outputs:
-            results: ${{ join(steps.*.outcome) }}
         steps:
             -   id: push-branch-check
                 continue-on-error: true
@@ -83,7 +77,7 @@ jobs:
 
     basics:
         runs-on: "ubuntu-latest"
-        if: "!contains(needs.check_prerequisites_artifact.outputs.results, 'failure') && ${{ always() && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+        if: "${{ !failure() && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         needs:
             -   check_prerequisites_artifact
         container:
@@ -154,7 +148,8 @@ jobs:
 
     run-tests:
         runs-on: "ubuntu-latest"
-        if: "${{ always() && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+        needs:
+            -   "basics"
         container:
             image: "epitechcontent/epitest-docker:latest"
         steps:
@@ -169,11 +164,11 @@ jobs:
 
     push-commits:
         runs-on: "ubuntu-latest"
-        if: "!contains(needs.check_prerequisites_push_branch.outputs.results, 'failure') && ${{ always() && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         needs:
             -   "basics"
             -   "run-tests"
             -   "check_prerequisites_push_branch"
+        if: "${{ !failure() && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         steps:
             -   name: "Checkout"
                 uses: "actions/checkout@v4.1.1"
@@ -186,11 +181,11 @@ jobs:
                 run: "git push origin ${{ github.ref_name }}:${{ github.event.repository.default_branch }}"
 
     mirror-commits:
-        if: " ${{ github.event_name == 'push' }} && !contains(needs.check_prerequisites_mirroring.outputs.results, 'failure') && ${{ always() && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         needs:
             -   "basics"
             -   "run-tests"
             -   "check_prerequisites_mirroring"
+        if: " ${{ github.event_name == 'push' }} && ${{ !failure() && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         runs-on: "ubuntu-latest"
         steps:
             -   name: "Checkout"
