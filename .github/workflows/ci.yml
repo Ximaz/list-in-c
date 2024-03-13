@@ -46,15 +46,6 @@ on:
     -   pull_request
 
 jobs:
-    check_prerequisites_artifact:
-        runs-on: "ubuntu-latest"
-        steps:
-            -   id: build-variables
-                continue-on-error: true
-                env:
-                    ARTIFACT: ${{ vars.ARTIFACT }}
-                run: '[ -n "${ARTIFACT}" ]'
-
     check_prerequisites_mirroring:
         runs-on: "ubuntu-latest"
         steps:
@@ -66,23 +57,16 @@ jobs:
                     MIRROR_URL: ${{ vars.MIRROR_URL }}
                 run: '[ -n "${SSH_PRIVATE_KEY}" ] && [ -n "${SSH_PRIVATE_KEY_PASSPHRASE}" ] && [ -n "${MIRROR_URL}" ]'
 
-    check_prerequisites_push_branch:
-        runs-on: "ubuntu-latest"
-        steps:
-            -   id: push-branch-check
-                continue-on-error: true
-                env:
-                    PERSONNAL_ACCESS_TOKEN: ${{ secrets.PERSONNAL_ACCESS_TOKEN }}
-                run: '[ -n "${PERSONNAL_ACCESS_TOKEN}" ]'
-
     basics:
         runs-on: "ubuntu-latest"
-        if: "${{ !failure() && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
-        needs:
-            -   check_prerequisites_artifact
+        if: "${{ format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         container:
             image: "ghcr.io/epitech/coding-style-checker:latest"
         steps:
+            -   name: "Check requirements"
+                if: vars.ARTIFACT
+                run: echo "Requirements passed"
+
             -   name: "Checkout"
                 uses: "actions/checkout@v4.1.1"
                 with:
@@ -148,8 +132,7 @@ jobs:
 
     run-tests:
         runs-on: "ubuntu-latest"
-        needs:
-            -   "basics"
+        if: "${{ format('refs/head/{0}', github.event.repository.default_branch) != github.ref }}"
         container:
             image: "epitechcontent/epitest-docker:latest"
         steps:
@@ -164,12 +147,17 @@ jobs:
 
     push-commits:
         runs-on: "ubuntu-latest"
+        if: "${{ format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         needs:
             -   "basics"
             -   "run-tests"
-            -   "check_prerequisites_push_branch"
-        if: "${{ !failure() && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+        env:
+            PERSONNAL_ACCESS_TOKEN: "${{ secrets.PERSONNAL_ACCESS_TOKEN }}"
         steps:
+            -   name: "Check requirements"
+                if: env.PERSONNAL_ACCESS_TOKEN
+                run: echo "Requirements passed"
+
             -   name: "Checkout"
                 uses: "actions/checkout@v4.1.1"
                 with:
@@ -177,7 +165,7 @@ jobs:
 
             -   name: "Push all commits"
                 env:
-                    GITHUB_TOKEN: "${{ secrets.PERSONNAL_ACCESS_TOKEN }}"
+                    GITHUB_TOKEN: "${{ env.PERSONNAL_ACCESS_TOKEN }}"
                 run: "git push origin ${{ github.ref_name }}:${{ github.event.repository.default_branch }}"
 
     mirror-commits:
@@ -185,9 +173,17 @@ jobs:
             -   "basics"
             -   "run-tests"
             -   "check_prerequisites_mirroring"
-        if: " ${{ github.event_name == 'push' }} && ${{ !failure() && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+        if: " ${{ github.event_name == 'push' }} && ${{ format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         runs-on: "ubuntu-latest"
+        env:
+            SSH_PRIVATE_KEY: "${{ secrets.SSH_PRIVATE_KEY }}"
+            SSH_PRIVATE_KEY_PASSPHRASE: "${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}"
+            MIRROR_URL: "${{ vars.MIRROR_URL }}"
         steps:
+            -   name: "Check requirements"
+                if: env.SSH_PRIVATE_KEY && env.MIRROR_URL
+                run: echo "Requirements passed"
+
             -   name: "Checkout"
                 uses: "actions/checkout@v4.1.1"
                 with:
@@ -196,6 +192,6 @@ jobs:
             -   name: "Mirror commits"
                 uses: "./.github/workflows/repository-mirroring-action"
                 with:
-                    target_repo_url: "${{ vars.MIRROR_URL }}"
-                    ssh_private_key: "${{ secrets.SSH_PRIVATE_KEY }}"
-                    ssh_private_key_passphrase: "${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}"
+                    target_repo_url: "${{ env.MIRROR_URL }}"
+                    ssh_private_key: "${{ env.SSH_PRIVATE_KEY }}"
+                    ssh_private_key_passphrase: "${{ env.SSH_PRIVATE_KEY_PASSPHRASE }}"
