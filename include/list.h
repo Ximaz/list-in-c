@@ -322,7 +322,7 @@ void list_map_into(list_t const *list, list_map_t map, list_t *output);
  * @param[in] elem
  * @return 0 (exclude) or 1 (include)
  */
-typedef int (*list_filter_t)(void *elem);
+typedef int (*list_filter_t)(void const *elem);
 
 /**
  * @brief This function filters all the elements of the list into a new one
