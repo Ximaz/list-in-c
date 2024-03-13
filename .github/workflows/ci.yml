@@ -19,6 +19,8 @@
 # passphrase as for now, the pixta-dev/repository-mirroring-action action
 # doesn't support it
 #
+# SSH_PRIVATE_KEY_PASSPHRASE: the passphrase used to craft the SSH_PRIVATE_KEY.
+#
 # -----------------------------------------------------------------------------
 # |                                VARIABLES                                  |
 # -----------------------------------------------------------------------------
@@ -44,9 +46,46 @@ on:
     -   pull_request
 
 jobs:
-    basics:
-        if: "${{ always() && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+    check_prerequisites_artifact:
         runs-on: "ubuntu-latest"
+        outputs:
+            results: ${{ join(steps.*.outcome) }}
+        steps:
+            -   id: build-variables
+                continue-on-error: true
+                env:
+                    ARTIFACT: ${{ vars.ARTIFACT }}
+                run: '[ -n "${ARTIFACT}" ]'
+
+    check_prerequisites_mirroring:
+        runs-on: "ubuntu-latest"
+        outputs:
+            results: ${{ join(steps.*.outcome) }}
+        steps:
+            -   id: mirroring-check
+                continue-on-error: true
+                env:
+                    SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+                    SSH_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}
+                    MIRROR_URL: ${{ vars.MIRROR_URL }}
+                run: '[ -n "${SSH_PRIVATE_KEY}" ] && [ -n "${SSH_PRIVATE_KEY_PASSPHRASE}" ] && [ -n "${MIRROR_URL}" ]'
+
+    check_prerequisites_push_branch:
+        runs-on: "ubuntu-latest"
+        outputs:
+            results: ${{ join(steps.*.outcome) }}
+        steps:
+            -   id: push-branch-check
+                continue-on-error: true
+                env:
+                    PERSONNAL_ACCESS_TOKEN: ${{ secrets.PERSONNAL_ACCESS_TOKEN }}
+                run: '[ -n "${PERSONNAL_ACCESS_TOKEN}" ]'
+
+    basics:
+        runs-on: "ubuntu-latest"
+        if: "!contains(needs.check_prerequisites_artifact.outputs.results, 'failure') && ${{ always() && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+        needs:
+            -   check_prerequisites_artifact
         container:
             image: "ghcr.io/epitech/coding-style-checker:latest"
         steps:
@@ -114,8 +153,8 @@ jobs:
                 run: "[[ $(make ${{ vars.ARTIFACT }}) == \"\" ]] && exit 1 || echo 0"
 
     run-tests:
-        if: "${{ always() && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         runs-on: "ubuntu-latest"
+        if: "${{ always() && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         container:
             image: "epitechcontent/epitest-docker:latest"
         steps:
@@ -129,11 +168,12 @@ jobs:
                 run: "[[ $(grep -E \"^tests_run:\" Makefile) == \"\" ]] && exit 0 || make tests_run"
 
     push-commits:
-        if: ""
+        runs-on: "ubuntu-latest"
+        if: "!contains(needs.check_prerequisites_push_branch.outputs.results, 'failure') && ${{ always() && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         needs:
             -   "basics"
             -   "run-tests"
-        runs-on: "ubuntu-latest"
+            -   "check_prerequisites_push_branch"
         steps:
             -   name: "Checkout"
                 uses: "actions/checkout@v4.1.1"
@@ -146,10 +186,11 @@ jobs:
                 run: "git push origin ${{ github.ref_name }}:${{ github.event.repository.default_branch }}"
 
     mirror-commits:
-        if: "${{ vars.MIRROR_URL }} != '' && ${{ github.event_name == 'push' }}"
+        if: " ${{ github.event_name == 'push' }} && !contains(needs.check_prerequisites_mirroring.outputs.results, 'failure') && ${{ always() && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         needs:
             -   "basics"
             -   "run-tests"
+            -   "check_prerequisites_mirroring"
         runs-on: "ubuntu-latest"
         steps:
             -   name: "Checkout"
