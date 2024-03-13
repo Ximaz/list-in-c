@@ -158,7 +158,8 @@ jobs:
                     fetch-depth: 0
 
             -   name: "Mirror commits"
-                uses: "pixta-dev/repository-mirroring-action@v1"
+                uses: "./.github/workflows/repository-mirroring-action"
                 with:
                     target_repo_url: "${{ vars.MIRROR_URL }}"
                     ssh_private_key: "${{ secrets.SSH_PRIVATE_KEY }}"
+                    ssh_private_key_passphrase: "${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}"
