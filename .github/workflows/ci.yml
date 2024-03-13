@@ -46,27 +46,48 @@ on:
     -   pull_request
 
 jobs:
+    check_prerequisites_basic:
+        runs-on: "ubuntu-latest"
+        outputs:
+            continue: "${{ steps.basic-check.outputs.continue }}"
+        steps:
+            -   id: basic-check
+                continue-on-error: true
+                env:
+                    ARTIFACT: "${{ vars.ARTIFACT }}"
+                run: '[ -n "${ARTIFACT}" ] && echo "continue=1" >> $GITHUB_OUTPUT || echo "continue=0" >> $GITHUB_OUTPUT'
+
     check_prerequisites_mirroring:
         runs-on: "ubuntu-latest"
+        outputs:
+            continue: "${{ steps.mirroring-check.outputs.continue }}"
         steps:
             -   id: mirroring-check
                 continue-on-error: true
                 env:
-                    SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-                    SSH_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}
-                    MIRROR_URL: ${{ vars.MIRROR_URL }}
-                run: '[ -n "${SSH_PRIVATE_KEY}" ] && [ -n "${SSH_PRIVATE_KEY_PASSPHRASE}" ] && [ -n "${MIRROR_URL}" ]'
+                    SSH_PRIVATE_KEY: "${{ secrets.SSH_PRIVATE_KEY }}"
+                    MIRROR_URL: "${{ vars.MIRROR_URL }}"
+                run: '[ -n "${SSH_PRIVATE_KEY}" ] && [ -n "${MIRROR_URL}" ] && echo "continue=1" >> $GITHUB_OUTPUT || echo "continue=0" >> $GITHUB_OUTPUT'
+
+    check_prerequisites_pushing:
+        runs-on: "ubuntu-latest"
+        outputs:
+            continue: "${{ steps.publishing-check.outputs.continue }}"
+        steps:
+            -   id: publishing-check
+                continue-on-error: true
+                env:
+                    PERSONNAL_ACCESS_TOKEN: "${{ secrets.PERSONNAL_ACCESS_TOKEN }}"
+                run: '[ -n "${PERSONNAL_ACCESS_TOKEN}" ] && echo "continue=1" >> $GITHUB_OUTPUT || echo "continue=0" >> $GITHUB_OUTPUT'
 
     basics:
+        needs:
+            -   "check_prerequisites_basic"
         runs-on: "ubuntu-latest"
-        if: "${{ format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+        if: "${{ needs.check_prerequisites_basic.outputs.continue == '1' && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         container:
             image: "ghcr.io/epitech/coding-style-checker:latest"
         steps:
-            -   name: "Check requirements"
-                if: vars.ARTIFACT
-                run: echo "Requirements passed"
-
             -   name: "Checkout"
                 uses: "actions/checkout@v4.1.1"
                 with:
@@ -146,18 +167,15 @@ jobs:
                 run: "[[ $(grep -E \"^tests_run:\" Makefile) == \"\" ]] && exit 0 || make tests_run"
 
     push-commits:
-        runs-on: "ubuntu-latest"
-        if: "${{ format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         needs:
             -   "basics"
             -   "run-tests"
+            -   "check_prerequisites_pushing"
+        runs-on: "ubuntu-latest"
+        if: "${{ needs.check_prerequisites_pushing.outputs.continue == '1' && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         env:
             PERSONNAL_ACCESS_TOKEN: "${{ secrets.PERSONNAL_ACCESS_TOKEN }}"
         steps:
-            -   name: "Check requirements"
-                if: env.PERSONNAL_ACCESS_TOKEN
-                run: echo "Requirements passed"
-
             -   name: "Checkout"
                 uses: "actions/checkout@v4.1.1"
                 with:
@@ -173,17 +191,13 @@ jobs:
             -   "basics"
             -   "run-tests"
             -   "check_prerequisites_mirroring"
-        if: " ${{ github.event_name == 'push' }} && ${{ format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+        if: " ${{ needs.check_prerequisites_mirroring.outputs.continue == '1' && github.event_name == 'push' }} && ${{ format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         runs-on: "ubuntu-latest"
         env:
             SSH_PRIVATE_KEY: "${{ secrets.SSH_PRIVATE_KEY }}"
             SSH_PRIVATE_KEY_PASSPHRASE: "${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}"
             MIRROR_URL: "${{ vars.MIRROR_URL }}"
         steps:
-            -   name: "Check requirements"
-                if: env.SSH_PRIVATE_KEY && env.MIRROR_URL
-                run: echo "Requirements passed"
-
             -   name: "Checkout"
                 uses: "actions/checkout@v4.1.1"
                 with:
