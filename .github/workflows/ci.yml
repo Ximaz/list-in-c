@@ -49,42 +49,42 @@ jobs:
     check_prerequisites_basic:
         runs-on: "ubuntu-latest"
         outputs:
-            continue: "${{ steps.basic-check.outputs.continue }}"
+            basic_passed: "${{ steps.basic-check.outputs.basic_passed }}"
         steps:
             -   id: "basic-check"
                 continue-on-error: true
                 env:
                     ARTIFACT: "${{ vars.ARTIFACT }}"
-                run: '[ -n "${ARTIFACT}" ] && echo "continue=1" >> $GITHUB_OUTPUT || echo "continue=0" >> $GITHUB_OUTPUT'
+                run: '[ -n "${ARTIFACT}" ] && echo "basic_passed=1" >> $GITHUB_OUTPUT || echo "basic_passed=0" >> $GITHUB_OUTPUT'
 
     check_prerequisites_mirroring:
         runs-on: "ubuntu-latest"
         outputs:
-            continue: "${{ steps.mirroring-check.outputs.continue }}"
+            mirroring_passed: "${{ steps.mirroring-check.outputs.mirroring_passed }}"
         steps:
             -   id: "mirroring-check"
                 continue-on-error: true
                 env:
                     SSH_PRIVATE_KEY: "${{ secrets.SSH_PRIVATE_KEY }}"
                     MIRROR_URL: "${{ vars.MIRROR_URL }}"
-                run: '[ -n "${SSH_PRIVATE_KEY}" ] && [ -n "${MIRROR_URL}" ] && echo "continue=1" >> $GITHUB_OUTPUT || echo "continue=0" >> $GITHUB_OUTPUT'
+                run: '[ -n "${SSH_PRIVATE_KEY}" ] && [ -n "${MIRROR_URL}" ] && echo "mirroring_passed=1" >> $GITHUB_OUTPUT || echo "mirroring_passed=0" >> $GITHUB_OUTPUT'
 
     check_prerequisites_pushing:
         runs-on: "ubuntu-latest"
         outputs:
-            continue: "${{ steps.publishing-check.outputs.continue }}"
+            pushing_passed: "${{ steps.publishing-check.outputs.pushing_passed }}"
         steps:
             -   id: "publishing-check"
                 continue-on-error: true
                 env:
                     PERSONNAL_ACCESS_TOKEN: "${{ secrets.PERSONNAL_ACCESS_TOKEN }}"
-                run: '[ -n "${PERSONNAL_ACCESS_TOKEN}" ] && echo "continue=1" >> $GITHUB_OUTPUT || echo "continue=0" >> $GITHUB_OUTPUT'
+                run: '[ -n "${PERSONNAL_ACCESS_TOKEN}" ] && echo "pushing_passed=1" >> $GITHUB_OUTPUT || echo "pushing_passed=0" >> $GITHUB_OUTPUT'
 
     basics:
         needs:
             -   "check_prerequisites_basic"
         runs-on: "ubuntu-latest"
-        if: "${{ needs.check_prerequisites_basic.outputs.continue == '1' && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+        if: "${{ needs.check_prerequisites_basic.outputs.basic_passed == '1' && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         container:
             image: "ghcr.io/epitech/coding-style-checker:latest"
         steps:
@@ -174,7 +174,7 @@ jobs:
             -   "run-tests"
             -   "check_prerequisites_pushing"
         runs-on: "ubuntu-latest"
-        if: "${{ needs.check_prerequisites_pushing.outputs.continue == '1' && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+        if: "${{ needs.check_prerequisites_pushing.outputs.pushing_passed == '1' && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         env:
             PERSONNAL_ACCESS_TOKEN: "${{ secrets.PERSONNAL_ACCESS_TOKEN }}"
         steps:
@@ -194,7 +194,7 @@ jobs:
             -   "run-tests"
             -   "push-commits"
             -   "check_prerequisites_mirroring"
-        if: " ${{ needs.check_prerequisites_mirroring.outputs.continue == '1' && github.event_name == 'push' }} && ${{ format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+        if: " ${{ needs.check_prerequisites_mirroring.outputs.mirroring_passed == '1' && github.event_name == 'push' }} && ${{ format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         runs-on: "ubuntu-latest"
         env:
             SSH_PRIVATE_KEY: "${{ secrets.SSH_PRIVATE_KEY }}"
