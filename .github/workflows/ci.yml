@@ -45,6 +45,9 @@ on:
     -   push
     -   pull_request
 
+env:
+    ACTIONS_RUNNER_DEBUG: true
+
 jobs:
     check_prerequisites_basic:
         runs-on: "ubuntu-latest"
