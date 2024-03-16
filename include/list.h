@@ -351,22 +351,38 @@ void list_filter_into(list_t const *list, list_filter_t filter,
     list_t *output);
 
 /**
- * @brief This function shoud be able to reduce two elements in one
+ * @brief This function should be able to reduce two elements in one
  *
  * @param[in] acc the accumulator
  * @param[in] elem the element to reduce
+ * @param[in] index the index of the 'elem'
+ * @param[in] list the list that holds the 'elem' at 'index'
  * @return The new accumulator / last value to store
  */
-typedef void *(*list_reduce_t)(void *acc, void *elem);
+typedef void *(*list_reduce_t)(void const *acc, void const *elem, int index,
+    list_t const *list);
+
+/**
+ * @brief This function is responsible for freeing the memory of the previous
+ * heap-allocated accumulator, if needed. If you don't need this, pass it as
+ * `NULL`. If `NULL` is passed, then the default `destroy` of the list
+ * will be used. If this function is also `NULL`, the allocator is considered
+ * as stack-allocated, thus nothing happens.
+ *
+ * @param[in] acc
+ */
+typedef void (*list_reduce_destroy_t)(void *acc);
 
 /**
  * @brief This function reduces all the elements of a list into a single one
  *
  * @param[in] list
- * @param[in] filter
+ * @param[in] reduce
  * @param[in] acc [OPT] the starting accumulator. if NULL, 1st elem of the list
+ * @param[in] acc_destroy [OPT] the previous accumulator destroyer
  */
-void *list_reduce(list_t const *list, list_reduce_t reduce);
+void *list_reduce(list_t const *list, list_reduce_t reduce, void *acc,
+    list_reduce_destroy_t acc_destroy);
 
 /* Algorithm */
 
