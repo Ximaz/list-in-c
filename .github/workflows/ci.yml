@@ -57,29 +57,6 @@ jobs:
                     ARTIFACT: "${{ vars.ARTIFACT }}"
                 run: '[ -n "${ARTIFACT}" ] && echo "basic_passed=1" >> $GITHUB_OUTPUT'
 
-    check_prerequisites_mirroring:
-        runs-on: "ubuntu-latest"
-        outputs:
-            mirroring_passed: "${{ steps.mirroring-check.outputs.mirroring_passed }}"
-        steps:
-            -   id: "mirroring-check"
-                continue-on-error: true
-                env:
-                    SSH_PRIVATE_KEY: "${{ secrets.SSH_PRIVATE_KEY }}"
-                    MIRROR_URL: "${{ vars.MIRROR_URL }}"
-                run: '[ -n "${SSH_PRIVATE_KEY}" ] && [ -n "${MIRROR_URL}" ] && echo "mirroring_passed=1" >> $GITHUB_OUTPUT'
-
-    check_prerequisites_pushing:
-        runs-on: "ubuntu-latest"
-        outputs:
-            pushing_passed: "${{ steps.publishing-check.outputs.pushing_passed }}"
-        steps:
-            -   id: "publishing-check"
-                continue-on-error: true
-                env:
-                    PERSONNAL_ACCESS_TOKEN: "${{ secrets.PERSONNAL_ACCESS_TOKEN }}"
-                run: '[ -n "${PERSONNAL_ACCESS_TOKEN}" ] && echo "pushing_passed=1" >> $GITHUB_OUTPUT'
-
     basics:
         needs:
             -   "check_prerequisites_basic"
@@ -168,10 +145,22 @@ jobs:
                 timeout-minutes: 1
                 run: "[[ $(grep -E \"^tests_run:\" Makefile) == \"\" ]] && exit 0 || make tests_run"
 
-    push-commits:
+    check_prerequisites_pushing:
+        runs-on: "ubuntu-latest"
         needs:
             -   "basics"
             -   "run-tests"
+        outputs:
+            pushing_passed: "${{ steps.publishing-check.outputs.pushing_passed }}"
+        steps:
+            -   id: "publishing-check"
+                continue-on-error: true
+                env:
+                    PERSONNAL_ACCESS_TOKEN: "${{ secrets.PERSONNAL_ACCESS_TOKEN }}"
+                run: '[ -n "${PERSONNAL_ACCESS_TOKEN}" ] && echo "pushing_passed=1" >> $GITHUB_OUTPUT'
+
+    push-commits:
+        needs:
             -   "check_prerequisites_pushing"
         runs-on: "ubuntu-latest"
         if: "${{ needs.check_prerequisites_pushing.outputs.pushing_passed == '1' && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
@@ -188,11 +177,22 @@ jobs:
                     GITHUB_TOKEN: "${{ env.PERSONNAL_ACCESS_TOKEN }}"
                 run: "git push origin ${{ github.ref_name }}:${{ github.event.repository.default_branch }}"
 
+    check_prerequisites_mirroring:
+        runs-on: "ubuntu-latest"
+        needs:
+            -   "push-commits"
+        outputs:
+            mirroring_passed: "${{ steps.mirroring-check.outputs.mirroring_passed }}"
+        steps:
+            -   id: "mirroring-check"
+                continue-on-error: true
+                env:
+                    SSH_PRIVATE_KEY: "${{ secrets.SSH_PRIVATE_KEY }}"
+                    MIRROR_URL: "${{ vars.MIRROR_URL }}"
+                run: '[ -n "${SSH_PRIVATE_KEY}" ] && [ -n "${MIRROR_URL}" ] && echo "mirroring_passed=1" >> $GITHUB_OUTPUT'
+
     mirror-commits:
         needs:
-            -   "basics"
-            -   "run-tests"
-            -   "push-commits"
             -   "check_prerequisites_mirroring"
         if: " ${{ needs.check_prerequisites_mirroring.outputs.mirroring_passed == '1' && github.event_name == 'push' }} && ${{ format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         runs-on: "ubuntu-latest"
