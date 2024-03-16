@@ -55,7 +55,7 @@ jobs:
                 continue-on-error: true
                 env:
                     ARTIFACT: "${{ vars.ARTIFACT }}"
-                run: '[ -n "${ARTIFACT}" ] && echo "basic_passed=1" >> $GITHUB_OUTPUT || echo "basic_passed=0" >> $GITHUB_OUTPUT'
+                run: '[ -n "${ARTIFACT}" ] && echo "basic_passed=1" >> $GITHUB_OUTPUT'
 
     check_prerequisites_mirroring:
         runs-on: "ubuntu-latest"
@@ -67,7 +67,7 @@ jobs:
                 env:
                     SSH_PRIVATE_KEY: "${{ secrets.SSH_PRIVATE_KEY }}"
                     MIRROR_URL: "${{ vars.MIRROR_URL }}"
-                run: '[ -n "${SSH_PRIVATE_KEY}" ] && [ -n "${MIRROR_URL}" ] && echo "mirroring_passed=1" >> $GITHUB_OUTPUT || echo "mirroring_passed=0" >> $GITHUB_OUTPUT'
+                run: '[ -n "${SSH_PRIVATE_KEY}" ] && [ -n "${MIRROR_URL}" ] && echo "mirroring_passed=1" >> $GITHUB_OUTPUT'
 
     check_prerequisites_pushing:
         runs-on: "ubuntu-latest"
@@ -78,7 +78,7 @@ jobs:
                 continue-on-error: true
                 env:
                     PERSONNAL_ACCESS_TOKEN: "${{ secrets.PERSONNAL_ACCESS_TOKEN }}"
-                run: '[ -n "${PERSONNAL_ACCESS_TOKEN}" ] && echo "pushing_passed=1" >> $GITHUB_OUTPUT || echo "pushing_passed=0" >> $GITHUB_OUTPUT'
+                run: '[ -n "${PERSONNAL_ACCESS_TOKEN}" ] && echo "pushing_passed=1" >> $GITHUB_OUTPUT'
 
     basics:
         needs:
