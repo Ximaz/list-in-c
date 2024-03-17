@@ -56,7 +56,7 @@ jobs:
         steps:
             -   id: "basic-check"
                 continue-on-error: true
-                run: "[ -n \"${{ vars.ARTIFACT }}\" ] && echo \"basic_passed=1\" >> $GITHUB_OUTPUT"
+                run: "[ \"\" == \"${{ vars.ARTIFACT }}\" ] && echo \"basic_passed=1\" >> $GITHUB_OUTPUT"
 
     basics:
         needs:
@@ -156,7 +156,7 @@ jobs:
         steps:
             -   id: "publishing-check"
                 continue-on-error: true
-                run: "[ -n \"${{ secrets.PERSONNAL_ACCESS_TOKEN }}\" ] && echo \"pushing_passed=1\" >> $GITHUB_OUTPUT"
+                run: "[ \"\" == \"${{ secrets.PERSONNAL_ACCESS_TOKEN }}\" ] && echo \"pushing_passed=1\" >> $GITHUB_OUTPUT"
 
     push-commits:
         needs:
@@ -183,7 +183,7 @@ jobs:
         steps:
             -   id: "mirroring-check"
                 continue-on-error: true
-                run: "[ -n \"${{ vars.MIRROR_URL }}\" ] && echo \"pushing_passed=1\" >> $GITHUB_OUTPUT"
+                run: "[ \"\" == \"${{ vars.MIRROR_URL }}\" ] && echo \"pushing_passed=1\" >> $GITHUB_OUTPUT"
 
     mirror-commits:
         needs:
