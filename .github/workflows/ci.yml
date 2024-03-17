@@ -45,27 +45,24 @@ on:
     -   push
     -   pull_request
 
-env:
-    ACTIONS_STEP_DEBUG: true
-
 jobs:
-    check_prerequisites_basic:
+    check-basics:
         runs-on: "ubuntu-latest"
         outputs:
-            basic_passed: "${{ steps.basic-check.outputs.basic_passed }}"
+            continue: "${{ steps.basic-check.outputs.continue }}"
         steps:
             -   id: "basic-check"
                 continue-on-error: true
                 env:
                     ARTIFACT: "${{ vars.ARTIFACT }}"
                 if: "${{ env.ARTIFACT }}"
-                run: "echo \"basic_passed=1\" >> $GITHUB_OUTPUT"
+                run: "echo \"continue=1\" >> $GITHUB_OUTPUT"
 
     basics:
         needs:
-            -   "check_prerequisites_basic"
+            -   "check-basics"
         runs-on: "ubuntu-latest"
-        if: "${{ needs.check_prerequisites_basic.outputs.basic_passed && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+        if: "${{ needs.check-basics.outputs.continue == '1' && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         container:
             image: "ghcr.io/epitech/coding-style-checker:latest"
         steps:
@@ -149,26 +146,26 @@ jobs:
                 timeout-minutes: 1
                 run: "[[ $(grep -E \"^tests_run:\" Makefile) == \"\" ]] && exit 0 || make tests_run"
 
-    check_prerequisites_pushing:
+    check-push-commits:
         runs-on: "ubuntu-latest"
         needs:
             -   "basics"
             -   "run-tests"
         outputs:
-            pushing_passed: "${{ steps.publishing-check.outputs.pushing_passed }}"
+            continue: "${{ steps.publishing-check.outputs.continue }}"
         steps:
             -   id: "publishing-check"
                 continue-on-error: true
                 env:
                     PERSONNAL_ACCESS_TOKEN: "${{ secrets.PERSONNAL_ACCESS_TOKEN }}"
                 if: "${{ env.PERSONNAL_ACCESS_TOKEN }}"
-                run: "echo \"pushing_passed=1\" >> $GITHUB_OUTPUT"
+                run: "echo \"continue=1\" >> $GITHUB_OUTPUT"
 
     push-commits:
         needs:
-            -   "check_prerequisites_pushing"
+            -   "check-push-commits"
         runs-on: "ubuntu-latest"
-        if: "${{ needs.check_prerequisites_pushing.outputs.pushing_passed && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+        if: "${{ needs.check-push-commits.outputs.continue == '1' && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         steps:
             -   name: "Checkout"
                 uses: "actions/checkout@v4.1.1"
@@ -180,12 +177,12 @@ jobs:
                     GITHUB_TOKEN: "${{ secrets.PERSONNAL_ACCESS_TOKEN }}"
                 run: "git push origin ${{ github.ref_name }}:${{ github.event.repository.default_branch }}"
 
-    check_prerequisites_mirroring:
+    check-mirror-commits:
         runs-on: "ubuntu-latest"
         needs:
             -   "push-commits"
         outputs:
-            mirroring_passed: "${{ steps.mirroring-check.outputs.mirroring_passed }}"
+            continue: "${{ steps.mirroring-check.outputs.continue }}"
         steps:
             -   id: "mirroring-check"
                 continue-on-error: true
@@ -193,12 +190,12 @@ jobs:
                     MIRROR_URL: "${{ vars.MIRROR_URL }}"
                     SSH_PRIVATE_KEY: "${{ secrets.SSH_PRIVATE_KEY }}"
                 if: "${{ env.MIRROR_URL && env.SSH_PRIVATE_KEY }}"
-                run: "echo \"mirroring_passed=1\" >> $GITHUB_OUTPUT"
+                run: "echo \"continue=1\" >> $GITHUB_OUTPUT"
 
     mirror-commits:
         needs:
-            -   "check_prerequisites_mirroring"
-        if: "${{ needs.check_prerequisites_mirroring.outputs.mirroring_passed == '1' && github.event_name == 'push' && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+            -   "check-mirror-commits"
+        if: "${{ needs.check-mirror-commits.outputs.continue == '1' && github.event_name == 'push' && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         runs-on: "ubuntu-latest"
         steps:
             -   name: "Checkout"
