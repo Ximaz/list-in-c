@@ -56,16 +56,13 @@ jobs:
         steps:
             -   id: "basic-check"
                 continue-on-error: true
-                run: |
-                    if [[ -n "${{ vars.ARTIFACT }}" ]]; then
-                        echo "::set-output name=basic_passed::1"
-                    fi
+                run: "[ -n \"${{ vars.ARTIFACT }}\" ] && echo \"basic_passed=1\" >> $GITHUB_OUTPUT"
 
     basics:
         needs:
             -   "check_prerequisites_basic"
         runs-on: "ubuntu-latest"
-        if: "${{ needs.check_prerequisites_basic.outputs.basic_passed == '1' && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+        if: "${{ needs.check_prerequisites_basic.outputs.basic_passed && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         container:
             image: "ghcr.io/epitech/coding-style-checker:latest"
         steps:
@@ -159,16 +156,13 @@ jobs:
         steps:
             -   id: "publishing-check"
                 continue-on-error: true
-                run: |
-                    if [[ -n "${{ secrets.PERSONNAL_ACCESS_TOKEN }}" ]]; then
-                        echo "::set-output name=pushing_passed::1"
-                    fi
+                run: "[ -n \"${{ secrets.PERSONNAL_ACCESS_TOKEN }}\" ] && echo \"pushing_passed=1\" >> $GITHUB_OUTPUT"
 
     push-commits:
         needs:
             -   "check_prerequisites_pushing"
         runs-on: "ubuntu-latest"
-        if: "${{ needs.check_prerequisites_pushing.outputs.pushing_passed == '1' && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+        if: "${{ needs.check_prerequisites_pushing.outputs.pushing_passed && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         steps:
             -   name: "Checkout"
                 uses: "actions/checkout@v4.1.1"
@@ -189,15 +183,12 @@ jobs:
         steps:
             -   id: "mirroring-check"
                 continue-on-error: true
-                run: |
-                    if [[ -n "${{ secrets.SSH_PRIVATE_KEY }}" && -n "${{ vars.MIRROR_URL }}" ]]; then
-                        echo "::set-output name=pushing_passed::1"
-                    fi
+                run: "[ -n \"${{ vars.MIRROR_URL }}\" ] && echo \"pushing_passed=1\" >> $GITHUB_OUTPUT"
 
     mirror-commits:
         needs:
             -   "check_prerequisites_mirroring"
-        if: " ${{ needs.check_prerequisites_mirroring.outputs.mirroring_passed == '1' && github.event_name == 'push' }} && ${{ format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
+        if: " ${{ needs.check_prerequisites_mirroring.outputs.mirroring_passed && github.event_name == 'push' && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         runs-on: "ubuntu-latest"
         steps:
             -   name: "Checkout"
