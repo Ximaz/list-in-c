@@ -46,7 +46,7 @@ on:
     -   pull_request
 
 env:
-    ACTIONS_RUNNER_DEBUG: true
+    ACTIONS_STEP_DEBUG: true
 
 jobs:
     check_prerequisites_basic:
@@ -56,7 +56,10 @@ jobs:
         steps:
             -   id: "basic-check"
                 continue-on-error: true
-                run: "[ -n \"${{ vars.ARTIFACT }}\" ] && echo \"basic_passed=1\" >> $GITHUB_OUTPUT"
+                run: |
+                    if [[ -n "${{ vars.ARTIFACT }}" ]]; then
+                        echo "::set-output name=basic_passed::1"
+                    fi
 
     basics:
         needs:
@@ -156,15 +159,16 @@ jobs:
         steps:
             -   id: "publishing-check"
                 continue-on-error: true
-                run: "[ -n \"${{ secrets.PERSONNAL_ACCESS_TOKEN }}\" ] && echo \"pushing_passed=1\" >> $GITHUB_OUTPUT"
+                run: |
+                    if [[ -n "${{ secrets.PERSONNAL_ACCESS_TOKEN }}" ]]; then
+                        echo "::set-output name=pushing_passed::1"
+                    fi
 
     push-commits:
         needs:
             -   "check_prerequisites_pushing"
         runs-on: "ubuntu-latest"
         if: "${{ needs.check_prerequisites_pushing.outputs.pushing_passed == '1' && format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
-        env:
-            PERSONNAL_ACCESS_TOKEN: "${{ secrets.PERSONNAL_ACCESS_TOKEN }}"
         steps:
             -   name: "Checkout"
                 uses: "actions/checkout@v4.1.1"
@@ -173,7 +177,7 @@ jobs:
 
             -   name: "Push all commits"
                 env:
-                    GITHUB_TOKEN: "${{ env.PERSONNAL_ACCESS_TOKEN }}"
+                    GITHUB_TOKEN: "${{ secrets.PERSONNAL_ACCESS_TOKEN }}"
                 run: "git push origin ${{ github.ref_name }}:${{ github.event.repository.default_branch }}"
 
     check_prerequisites_mirroring:
@@ -185,17 +189,16 @@ jobs:
         steps:
             -   id: "mirroring-check"
                 continue-on-error: true
-                run: "[ -n \"${{ secrets.SSH_PRIVATE_KEY }}\" ] && [ -n \"${{ vars.MIRROR_URL }}\" ] && echo \"mirroring_passed=1\" >> $GITHUB_OUTPUT"
+                run: |
+                    if [[ -n "${{ secrets.SSH_PRIVATE_KEY }}" && -n "${{ vars.MIRROR_URL }}" ]]; then
+                        echo "::set-output name=pushing_passed::1"
+                    fi
 
     mirror-commits:
         needs:
             -   "check_prerequisites_mirroring"
         if: " ${{ needs.check_prerequisites_mirroring.outputs.mirroring_passed == '1' && github.event_name == 'push' }} && ${{ format('refs/heads/{0}', github.event.repository.default_branch) != github.ref }}"
         runs-on: "ubuntu-latest"
-        env:
-            SSH_PRIVATE_KEY: "${{ secrets.SSH_PRIVATE_KEY }}"
-            SSH_PRIVATE_KEY_PASSPHRASE: "${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}"
-            MIRROR_URL: "${{ vars.MIRROR_URL }}"
         steps:
             -   name: "Checkout"
                 uses: "actions/checkout@v4.1.1"
@@ -205,6 +208,6 @@ jobs:
             -   name: "Mirror commits"
                 uses: "./.github/workflows/repository-mirroring-action"
                 with:
-                    target_repo_url: "${{ env.MIRROR_URL }}"
-                    ssh_private_key: "${{ env.SSH_PRIVATE_KEY }}"
-                    ssh_private_key_passphrase: "${{ env.SSH_PRIVATE_KEY_PASSPHRASE }}"
+                    target_repo_url: "${{ vars.MIRROR_URL }}"
+                    ssh_private_key: "${{ secrets.SSH_PRIVATE_KEY }}"
+                    ssh_private_key_passphrase: "${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}"
