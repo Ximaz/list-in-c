@@ -32,7 +32,7 @@ tests/%.o:	tests/%.c
 
 all:	$(NAME)
 
-$(NAME):	CFLAGS = -Wall -Wextra -Werror -pedantic -ansi
+$(NAME):	CFLAGS = -Wall -Wextra -Werror -pedantic -ansi -fPIC
 $(NAME):	clean	$(OBJS)
 	$(CC) -shared -fPIC $(OBJS) -o $(NAME)
 
