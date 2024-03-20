@@ -21,6 +21,7 @@ static list_elem_t *get_list_elem(void **elem)
 static void list_swap_elem(list_elem_t *a, list_elem_t *b)
 {
     void *tmp = a->elem;
+
     a->elem = b->elem;
     b->elem = tmp;
 }
