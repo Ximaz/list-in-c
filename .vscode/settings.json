@@ -10,6 +10,7 @@
         "assert.h": "c",
         "_types.h": "c",
         "unordered_map": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "criterion.h": "c"
     }
 }

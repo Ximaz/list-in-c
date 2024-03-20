@@ -8,16 +8,6 @@
 #include <stdlib.h>
 #include "list.h"
 
-static list_elem_t *get_list_elem(void **elem)
-{
-    list_elem_t e = { 0 };
-    unsigned long offset = ((unsigned long *) &e.elem - (unsigned long *) &e);
-    unsigned long p = ((unsigned long) elem - (unsigned long) offset);
-    list_elem_t *x = (list_elem_t *) p;
-
-    return x;
-}
-
 static void list_swap_elem(list_elem_t *a, list_elem_t *b)
 {
     void *tmp = a->elem;
@@ -26,26 +16,52 @@ static void list_swap_elem(list_elem_t *a, list_elem_t *b)
     b->elem = tmp;
 }
 
+static list_elem_t *list_seek_to(list_t const *list, int index)
+{
+    list_elem_t *head = list->elems_head;
+
+    while (NULL != head && 0 < index) {
+        head = head->next;
+        --index;
+    }
+    if (0 == index)
+        return head;
+    return NULL;
+}
+
+static list_elem_t *list_seek_by(list_elem_t *ref, int by)
+{
+    list_elem_t *dest = ref;
+
+    while (NULL != dest && 0 < by) {
+        dest = dest->next;
+        --by;
+    }
+    if (0 == by)
+        return dest;
+    return NULL;
+}
+
 static int partition(list_t *list, int low, int high, list_sort_t sort)
 {
-    int j = low;
-    int i = j - 1;
-    void *elem_curr = NULL;
-    void *elem_piv = list_value_at(list, high);
-    list_elem_t *current = NULL;
-    list_elem_t *pivot = get_list_elem(&elem_piv);
+    int i = low - 1;
+    list_elem_t *tmp_head = NULL;
+    list_elem_t *low_head = list_seek_to(list, low);
+    list_elem_t *high_head = list_seek_to(list, high);
 
-    for (; j < high; ++j) {
-        elem_curr = list_value_at(list, j);
-        current = get_list_elem(&elem_curr);
-        if (0 < sort(current->elem, pivot->elem)) {
-            ++i;
-            list_swap_elem(current, pivot);
-        }
+    for (; low_head != high_head; low_head = low_head->next) {
+        if (0 >= sort(high_head->elem, low_head->elem))
+            continue;
+        ++i;
+        if (low == i)
+            tmp_head = list_seek_to(list, i);
+        else
+            tmp_head = list_seek_by(tmp_head, 1);
+        list_swap_elem(low_head, tmp_head);
     }
     ++i;
-    elem_curr = list_value_at(list, i);
-    list_swap_elem(get_list_elem(&elem_curr), pivot);
+    tmp_head = list_seek_by(tmp_head, 1);
+    list_swap_elem(tmp_head, high_head);
     return i;
 }
 
@@ -56,7 +72,9 @@ static void quick_sort(list_t *list, int low, int high, list_sort_t sort)
     if (low < high) {
         p = partition(list, low, high, sort);
         quick_sort(list, low, p - 1, sort);
+        list_print(list);
         quick_sort(list, p + 1, high, sort);
+        list_print(list);
     }
 }
 

@@ -425,4 +425,12 @@ list_t *list_sort(list_t const *list, list_sort_t sort);
  */
 void list_sort_itself(list_t *list, list_sort_t sort);
 
+/**
+ * @brief Prints the current list to the STDOUT in the following format :
+ * {[ELEM_ADDR](NODE_ADDR)}-><next>
+ *
+ * @param[in] list
+ */
+void list_print(list_t const *list);
+
 #endif /* __LIST_H_ */
