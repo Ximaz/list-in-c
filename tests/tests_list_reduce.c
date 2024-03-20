@@ -63,6 +63,7 @@ Test(list_reduce, test_impl_destroy)
 {
     list_t list = { 0 };
 
+    list.destroy = &free;
     cr_assert(eq(int, 0, list_push_back(&list, strdup("a"))));
     cr_assert(eq(int, 0, list_push_back(&list, strdup("b"))));
     cr_assert(eq(int, 0, list_push_back(&list, strdup("c"))));

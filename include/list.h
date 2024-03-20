@@ -66,10 +66,11 @@ typedef int (*list_equal_cmp_t)(void const *expected, void const *elem);
 int list_index_of(list_t const *list, void const *elem, list_equal_cmp_t cmp);
 
 /**
- * @brief Returns the element for the given index, or NULL if Out-Of-Range
+ * @brief Returns the element for the given index
  *
  * @param[in] list
  * @param[in] index
+ * @return the element on success, NULL on error (Out-Of-Range)
  */
 void *list_value_at(list_t const *list, int index);
 
@@ -397,7 +398,16 @@ void *list_reduce(list_t const *list, list_reduce_t reduce, void *acc,
  * @param[in] elem_b
  * @return elem_a - elem_b
 */
-typedef int (*list_sort_t)(void *elem_a, void *elem_b);
+typedef int (*list_sort_t)(void const *elem_a, void const *elem_b);
+
+/**
+ * @brief Sorts all the elements of the list into output
+ *
+ * @param[in] list
+ * @param[in] sort
+ * @param[out] output
+ */
+void list_sort_into(list_t const *list, list_sort_t sort, list_t *output);
 
 /**
  * @brief Sorts all the elements of the list into a new allocated one
@@ -414,14 +424,5 @@ list_t *list_sort(list_t const *list, list_sort_t sort);
  * @param[in] sort
  */
 void list_sort_itself(list_t *list, list_sort_t sort);
-
-/**
- * @brief Sorts all the elements of the list into output
- *
- * @param[in] list
- * @param[in] sort
- * @param[out] output
- */
-void list_sort_into(list_t const *list, list_sort_t sort, list_t *output);
 
 #endif /* __LIST_H_ */

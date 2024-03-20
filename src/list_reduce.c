@@ -13,6 +13,7 @@ static int list_reduce_setup(list_elem_t **head, void **acc, int *i)
         return -1;
     if (NULL == (*acc)) {
         (*acc) = (*head)->elem;
+        (*head)->elem = NULL;
         (*head) = (*head)->next;
         ++(*i);
     }

@@ -9,6 +9,7 @@
         "vector": "c",
         "assert.h": "c",
         "_types.h": "c",
-        "unordered_map": "c"
+        "unordered_map": "c",
+        "stdio.h": "c"
     }
 }
