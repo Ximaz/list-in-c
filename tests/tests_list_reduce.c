@@ -13,7 +13,7 @@
 #include "list.h"
 
 static void *reduce(void const *acc, void const *current,
-    int index __attribute__((unused)),
+    long index __attribute__((unused)),
     list_t const *list __attribute__((unused)))
 {
     unsigned long long a = (unsigned long long) acc;
@@ -22,7 +22,7 @@ static void *reduce(void const *acc, void const *current,
 }
 
 static void *reduce_str(void const *acc, void const *current,
-    int index __attribute__((unused)),
+    long index __attribute__((unused)),
     list_t const *list __attribute__((unused)))
 {
     char const *a = acc;

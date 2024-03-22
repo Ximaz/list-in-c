@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static list_elem_t *move_to(list_elem_t *node, int range)
+static list_elem_t *move_to(list_elem_t *node, long range)
 {
     while (NULL != node && 0 < range) {
         node = node->next;
@@ -18,7 +18,7 @@ static list_elem_t *move_to(list_elem_t *node, int range)
     return node;
 }
 
-static int convert_indexes(list_t const *list, int *from, int *to)
+static int convert_indexes(list_t const *list, long *from, long *to)
 {
     if (0 > *from)
         *from += list->count;
@@ -29,7 +29,7 @@ static int convert_indexes(list_t const *list, int *from, int *to)
     return 0;
 }
 
-int list_slice_into(list_t const *list, int from, int to, list_t *output)
+int list_slice_into(list_t const *list, long from, long to, list_t *output)
 {
     list_elem_t *head = list->elems_head;
 
@@ -44,7 +44,7 @@ int list_slice_into(list_t const *list, int from, int to, list_t *output)
     return 0;
 }
 
-list_t *list_slice(list_t const *list, int from, int to)
+list_t *list_slice(list_t const *list, long from, long to)
 {
     list_t *sliced = NULL;
 
@@ -60,7 +60,7 @@ list_t *list_slice(list_t const *list, int from, int to)
     return sliced;
 }
 
-static void destroy_list_tail(list_t *list, int range)
+static void destroy_list_tail(list_t *list, long range)
 {
     list_elem_t *tmp = NULL;
 
@@ -75,7 +75,7 @@ static void destroy_list_tail(list_t *list, int range)
     list->elems_tail->next = NULL;
 }
 
-static void destroy_list_head(list_t *list, int range)
+static void destroy_list_head(list_t *list, long range)
 {
     list_elem_t *tmp = NULL;
 
@@ -90,7 +90,7 @@ static void destroy_list_head(list_t *list, int range)
     list->elems_head->prev = NULL;
 }
 
-int list_slice_itself(list_t *list, int from, int to)
+int list_slice_itself(list_t *list, long from, long to)
 {
     if (-1 == convert_indexes(list, &from, &to))
         return -1;

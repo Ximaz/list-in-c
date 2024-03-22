@@ -18,7 +18,7 @@ static void list_elem_remove(list_elem_t *e)
     free(e);
 }
 
-void *list_remove_at(list_t *list, int index)
+void *list_remove_at(list_t *list, long index)
 {
     void *data = NULL;
     list_elem_t *e = list->elems_head;

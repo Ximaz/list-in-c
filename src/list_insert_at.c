@@ -20,7 +20,7 @@ static list_elem_t *list_elem_insert(list_elem_t *e, void *elem)
     return new_elem;
 }
 
-static int list_insert(list_t *list, void *elem, int index)
+static int list_insert(list_t *list, void *elem, long index)
 {
     list_elem_t *new_e = NULL;
     list_elem_t *e = list->elems_head;
@@ -38,7 +38,7 @@ static int list_insert(list_t *list, void *elem, int index)
     return 0;
 }
 
-int list_insert_at(list_t *list, void *elem, int index)
+int list_insert_at(list_t *list, void *elem, long index)
 {
     if ((0 > index && 0 == list->count) || index > list->count)
         return -1;

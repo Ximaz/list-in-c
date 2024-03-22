@@ -7,7 +7,7 @@
 
 #include "list.h"
 
-void *list_value_at(list_t const *list, int index)
+void *list_value_at(list_t const *list, long index)
 {
     list_elem_t *elem = list->elems_head;
 

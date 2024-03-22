@@ -19,11 +19,11 @@ Test(list_pop_back, test_impl)
 
     cr_assert(eq(int, 0, list_push_back(list, strdup("Hello, World !"))));
     cr_assert(eq(int, 0, list_push_back(list, strdup("This is my tail !"))));
-    cr_assert(eq(int, 2, list_count(list)));
+    cr_assert(eq(long, 2, list_count(list)));
     s2 = list_pop_back(list);
-    cr_assert(eq(int, 1, list_count(list)));
+    cr_assert(eq(long, 1, list_count(list)));
     s1 = list_pop_back(list);
-    cr_assert(eq(int, 0, list_count(list)));
+    cr_assert(eq(long, 0, list_count(list)));
     cr_assert(eq(str, "Hello, World !", s1));
     cr_assert(eq(str, "This is my tail !", s2));
     free(s2);
@@ -39,11 +39,11 @@ Test(list_pop_front, test_impl)
 
     cr_assert(eq(int, 0, list_push_back(list, strdup("This is my head !"))));
     cr_assert(eq(int, 0, list_push_back(list, strdup("Hello, World !"))));
-    cr_assert(eq(int, 2, list_count(list)));
+    cr_assert(eq(long, 2, list_count(list)));
     s1 = list_pop_front(list);
-    cr_assert(eq(int, 1, list_count(list)));
+    cr_assert(eq(long, 1, list_count(list)));
     s2 = list_pop_front(list);
-    cr_assert(eq(int, 0, list_count(list)));
+    cr_assert(eq(long, 0, list_count(list)));
     cr_assert(eq(str, "This is my head !", s1));
     cr_assert(eq(str, "Hello, World !", s2));
     free(s2);

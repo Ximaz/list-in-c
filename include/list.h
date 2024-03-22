@@ -24,7 +24,7 @@ typedef struct s_list_elem {
 } list_elem_t;
 
 typedef struct s_list {
-    int count;
+    long count;
     list_elem_destroy_t destroy;
     list_elem_t *elems_head;
     list_elem_t *elems_tail;
@@ -36,6 +36,17 @@ list_t *list_new(list_elem_destroy_t destroy);
 
 void list_destroy(list_t *list);
 
+/**
+ * @brief Transforms a generic array to a list
+ *
+ * @param[in] array
+ * @param[in] size The size of the array
+ * @param[in] destroy [OPT] The destructor for array's elem (may be NULL)
+ * @return The new list on success, NULL on error
+ */
+list_t *array_to_list(void *const *const array, long size,
+    list_elem_destroy_t destroy);
+
 /* Getters */
 
 /**
@@ -43,7 +54,7 @@ void list_destroy(list_t *list);
  *
  * @param[in] list
  */
-int list_count(list_t const *list);
+long list_count(list_t const *list);
 
 /**
  * @brief This function type will be used to compare two elements
@@ -63,7 +74,7 @@ typedef int (*list_equal_cmp_t)(void const *expected, void const *elem);
  * @param[in] elem
  * @param[in] cmp the function to compare elements with
  */
-int list_index_of(list_t const *list, void const *elem, list_equal_cmp_t cmp);
+long list_index_of(list_t const *list, void const *elem, list_equal_cmp_t cmp);
 
 /**
  * @brief Returns the element for the given index
@@ -72,7 +83,7 @@ int list_index_of(list_t const *list, void const *elem, list_equal_cmp_t cmp);
  * @param[in] index
  * @return the element on success, NULL on error (Out-Of-Range)
  */
-void *list_value_at(list_t const *list, int index);
+void *list_value_at(list_t const *list, long index);
 
 /* Operators */
 
@@ -109,9 +120,10 @@ int list_push_front(list_t *list, void *elem);
  *
  * @param[in] list
  * @param[in] elem
+ * @param[in] index
  * @return 0 on success, -1 on error (Out-Of-Range)
  */
-int list_insert_at(list_t *list, void *elem, int index);
+int list_insert_at(list_t *list, void *elem, long index);
 
 /**
  * @brief Pushes an element at the back of the list
@@ -146,7 +158,7 @@ void *list_pop_front(list_t *list);
  * @param[in] elem
  * @return the pop'd element if any, NULL otherwise
  */
-void *list_remove_at(list_t *list, int index);
+void *list_remove_at(list_t *list, long index);
 
 /**
  * @brief Pops an element from the back of the list
@@ -201,7 +213,7 @@ int list_reverse_into(list_t const *list, list_t *output);
  * @param[in] from
  * @param[in] to (excluded)
  */
-list_t *list_slice(list_t const *list, int from, int to);
+list_t *list_slice(list_t const *list, long from, long to);
 
 /**
  * @brief Slices the current list itself, no allocation of any kind. All
@@ -213,7 +225,7 @@ list_t *list_slice(list_t const *list, int from, int to);
  * @param[in] to (excluded)
  * @return 0 on success, -1 otherwise, the list is unchanged (Out-Of-Range)
  */
-int list_slice_itself(list_t *list, int from, int to);
+int list_slice_itself(list_t *list, long from, long to);
 
 /**
  * @brief Slices a list from 'from' to 'to' (excluded) into the output list
@@ -224,7 +236,7 @@ int list_slice_itself(list_t *list, int from, int to);
  * @param[out] output
  * @return 0 on success, -1 otherwise (Out-Of-Range)
  */
-int list_slice_into(list_t const *list, int from, int to,
+int list_slice_into(list_t const *list, long from, long to,
     list_t *output);
 
 /**
@@ -360,7 +372,7 @@ void list_filter_into(list_t const *list, list_filter_t filter,
  * @param[in] list the list that holds the 'elem' at 'index'
  * @return The new accumulator / last value to store
  */
-typedef void *(*list_reduce_t)(void const *acc, void const *elem, int index,
+typedef void *(*list_reduce_t)(void const *acc, void const *elem, long index,
     list_t const *list);
 
 /**

@@ -72,9 +72,7 @@ static void quick_sort(list_t *list, int low, int high, list_sort_t sort)
     if (low < high) {
         p = partition(list, low, high, sort);
         quick_sort(list, low, p - 1, sort);
-        list_print(list);
         quick_sort(list, p + 1, high, sort);
-        list_print(list);
     }
 }
 
