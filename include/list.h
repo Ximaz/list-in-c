@@ -47,6 +47,14 @@ void list_destroy(list_t *list);
 list_t *array_to_list(void *const *const array, long size,
     list_elem_destroy_t destroy);
 
+/**
+ * @brief Transforms a list to a generic array
+ *
+ * @param[in] list The list to convert to an array
+ * @return heap-allocated array on success, NULL otherwise
+ */
+void **list_to_array(list_t const *list, unsigned long elem_size);
+
 /* Getters */
 
 /**
