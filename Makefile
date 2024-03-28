@@ -6,7 +6,6 @@
 ##
 
 CC				:=	gcc
-NAME			:=	liblist.so
 CPPFLAGS		:=	-Iinclude/
 
 SRCS			:=	$(shell find src -name '*.c')
@@ -30,11 +29,15 @@ RM				:=	rm -rf
 tests/%.o:	tests/%.c
 	$(CC) $(TESTS_CFLAGS) $(CPPFLAGS) -o $@ -c $<
 
-all:	$(NAME)
+all:	liblist.so	liblist.a
 
-$(NAME):	CFLAGS = -Wall -Wextra -Werror -pedantic -ansi -fPIC
-$(NAME):	clean	$(OBJS)
-	$(CC) -shared -fPIC $(OBJS) -o $(NAME)
+liblist.so:	CFLAGS = -Wall -Wextra -Werror -pedantic -ansi -fPIC
+liblist.so:	clean	$(OBJS)
+	$(CC) -shared -fPIC $(OBJS) -o $@
+
+liblist.a:	CFLAGS = -Wall -Wextra -Werror -pedantic -ansi -fPIC
+liblist.a:	clean	$(OBJS)
+	ar -rcs $@ $(OBJS)
 
 tests_run:	CFLAGS = -g -Wall -Wextra -Werror -pedantic -ansi --coverage
 tests_run:	clean	$(OBJS)	$(TESTS_OBJS)
@@ -52,7 +55,7 @@ clean:
 	$(RM) $(shell find . -type f -name '*.gcda')
 
 fclean:	clean
-	$(RM) $(NAME)
+	$(RM) liblist.so liblist.a
 	$(RM) unit_tests
 
 re:	fclean	all
