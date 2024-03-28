@@ -62,6 +62,7 @@ Test(list_reduce, test_impl_default_acc)
 Test(list_reduce, test_impl_destroy)
 {
     list_t list = { 0 };
+    char *reduced = NULL;
 
     list.destroy = &free;
     cr_assert(eq(int, 0, list_push_back(&list, strdup("a"))));
@@ -69,8 +70,10 @@ Test(list_reduce, test_impl_destroy)
     cr_assert(eq(int, 0, list_push_back(&list, strdup("c"))));
     cr_assert(eq(int, 0, list_push_back(&list, strdup("d"))));
     cr_assert(eq(int, 0, list_push_back(&list, strdup("e"))));
-    cr_assert(eq(str, "abcde", list_reduce(&list, reduce_str, NULL, free)));
+    reduced = list_reduce(&list, reduce_str, NULL, free);
+    cr_assert(eq(str, "abcde", reduced));
     list_clear(&list);
+    free(reduced);
 }
 
 Test(list_reduce, test_impl_empty)
