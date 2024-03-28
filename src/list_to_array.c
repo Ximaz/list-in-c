@@ -5,7 +5,6 @@
 ** list_to_array.c
 */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include "list.h"
 
@@ -26,6 +25,5 @@ void **list_to_array(list_t const *list, unsigned long elem_size)
         head = head->next;
         ++i;
     }
-    printf("%ld\n", list->count);
     return array;
 }
