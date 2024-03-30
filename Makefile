@@ -5,6 +5,9 @@
 ## Makefile
 ##
 
+LIB_PATH		:=	/usr/local/lib/list
+INCLUDE_PATH	:=	/usr/local/include/list
+
 CC				:=	gcc
 CPPFLAGS		:=	-Iinclude/
 
@@ -44,6 +47,15 @@ tests_run:	$(OBJS)	$(TESTS_OBJS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJS) $(TESTS_OBJS) -o unit_tests -lcriterion
 	CRITERION_NO_EARLY_EXIT=1 ./unit_tests
 	gcovr -e tests .
+
+install:	all
+	mkdir -p $(LIB_PATH) $(INCLUDE_PATH)
+	mv liblist.a $(LIB_PATH)
+	mv liblist.so $(LIB_PATH)
+	cp include/list.h $(INCLUDE_PATH)
+
+uninstall:
+	$(RM) $(LIB_PATH) $(INCLUDE_PATH)
 
 valgrind:	tests_run
 	valgrind $(VALGRIND_FLAGS) ./unit_tests
