@@ -483,4 +483,42 @@ int list_all(list_t const *list, list_filter_t filter);
  */
 int list_any(list_t const *list, list_filter_t filter);
 
+/**
+ * @brief Extends the output list from the input list
+ *
+ * Both output and input must have the same destroyer function. Else, -1 will
+ * be returned.
+ *
+ * @param[out] output
+ * @param[in] input
+ * @returns 0 on success, -1 on error
+ */
+int list_extend(list_t *output, list_t const *input);
+
+/**
+ * @brief Deeply extends the output list from the input list
+ *
+ * Both output and input must have the same destroyer function. Else, -1 will
+ * be returned.
+ *
+ * @param[out] output
+ * @param[in] input
+ * @param[in] copy may be NULL, calling list_extend instead
+ * @returns 0 on success, -1 on error
+ */
+int list_deep_extend(list_t *output, list_t const *input, list_copy_t copy);
+
+/**
+ * @brief Modifies the existing element
+ */
+typedef void (*list_apply_t)(void *elem);
+
+/**
+ * @brief Applies a function to each elements of the list
+ *
+ * @param[in] list
+ * @param[in] apply
+ */
+void list_apply(list_t *list, list_apply_t apply);
+
 #endif /* __LIST_H_ */

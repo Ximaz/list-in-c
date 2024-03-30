@@ -40,7 +40,7 @@ liblist.a:	clean	$(OBJS)
 	ar -rcs $@ $(OBJS)
 
 tests_run:	CFLAGS = -g -Wall -Wextra -Werror -pedantic -ansi --coverage
-tests_run:	clean	$(OBJS)	$(TESTS_OBJS)
+tests_run:	$(OBJS)	$(TESTS_OBJS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJS) $(TESTS_OBJS) -o unit_tests -lcriterion
 	CRITERION_NO_EARLY_EXIT=1 ./unit_tests
 	gcovr -e tests .
