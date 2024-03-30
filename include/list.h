@@ -453,4 +453,34 @@ void list_sort_itself(list_t *list, list_sort_t sort);
  */
 void list_print(list_t const *list);
 
+/**
+ * @brief Returns whether or not the list includes an element.
+ *
+ * @param[in] list
+ * @param[in] elem
+ * @param[in] cmp the function to compare elements with (may be NULL)
+ * @return 1 if list includes the elem, 0 otherwise
+ */
+int list_includes(list_t const *list, void const *elem, list_equal_cmp_t cmp);
+
+/**
+ * @brief Returns whether or not all elements respect a certain condition
+ *
+ * @param[in] list
+ * @param[in] elem
+ * @param[in] filter the function validating an element
+ * @return 1 if all elements are validated, 0 otherwise
+ */
+int list_all(list_t const *list, list_filter_t filter);
+
+/**
+ * @brief Returns whether or not any element respects a certain condition
+ *
+ * @param[in] list
+ * @param[in] elem
+ * @param[in] filter the function validating an element
+ * @return 1 if any element is validated, 0 otherwise
+ */
+int list_any(list_t const *list, list_filter_t filter);
+
 #endif /* __LIST_H_ */
