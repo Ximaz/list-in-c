@@ -5,11 +5,25 @@
 ## Makefile
 ##
 
-LIB_PATH		:=	/usr/local/lib/list
+LIB_PATH		:=	/usr/local/lib
 INCLUDE_PATH	:=	/usr/local/include/list
 
 CC				:=	gcc
 CPPFLAGS		:=	-Iinclude/
+CFLAGS 			:=	-Wall -Wextra -Werror -pedantic -ansi -fPIC \
+					-fno-delete-null-pointer-checks -fno-strict-overflow \
+					-fno-strict-aliasing -ftrivial-auto-var-init=zero \
+					-Wtrampolines -Wformat -Wimplicit-fallthrough \
+					-U_FORTIFY_SOURCE -D_GLIBCXX_ASSERTIONS -Wl,-z,nodlopen \
+					-Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now
+
+ifeq ($(PLATFORM),x86_64)
+	CFLAGS		+=	-fcf-protection=full
+endif
+
+ifeq ($(PLATFORM),aarch64)
+	CFLAGS		+=	-mbranch-protection=standard
+endif
 
 SRCS			:=	$(shell find src -name '*.c')
 OBJS			:=	$(SRCS:.c=.o)
@@ -29,45 +43,55 @@ VALGRIND_FLAGS	:=	-s							\
 
 RM				:=	rm -rf
 
+tests/%.o:	CFLAGS = -Wall -Wextra -Werror
 tests/%.o:	tests/%.c
-	$(CC) $(TESTS_CFLAGS) $(CPPFLAGS) -o $@ -c $<
+	@$(CC) $(TESTS_CFLAGS) $(CPPFLAGS) -o $@ -c $<
 
-all:	liblist.so	liblist.a
+all:	liblist.a	liblist.so	liblist.dylib
 
-liblist.so:	CFLAGS = -Wall -Wextra -Werror -pedantic -ansi -fPIC
-liblist.so:	clean	$(OBJS)
-	$(CC) -shared -fPIC $(OBJS) -o $@
+liblist.so:	$(OBJS)
+	@$(CC) -shared $(CFLAGS) $(OBJS) -o $@
 
-liblist.a:	CFLAGS = -Wall -Wextra -Werror -pedantic -ansi -fPIC
-liblist.a:	clean	$(OBJS)
-	ar -rcs $@ $(OBJS)
+liblist.dylib:	$(OBJS)
+	@$(CC) -shared $(CFLAGS) $(OBJS) -o $@
 
-tests_run:	CFLAGS = -g -Wall -Wextra -Werror -pedantic -ansi --coverage
-tests_run:	$(OBJS)	$(TESTS_OBJS)
+liblist.a:	$(OBJS)
+	@ar -rcs $@ $(OBJS)
+
+tests_run:	CFLAGS += -g --coverage
+tests_run:	fclean	uninstall	$(OBJS)	$(TESTS_OBJS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJS) $(TESTS_OBJS) -o unit_tests -lcriterion
-	CRITERION_NO_EARLY_EXIT=1 ./unit_tests
-	gcovr -e tests .
+	@CRITERION_NO_EARLY_EXIT=1 ./unit_tests
+	@gcovr -e tests .
 
 install:	all
-	mkdir -p $(LIB_PATH) $(INCLUDE_PATH)
-	mv liblist.a $(LIB_PATH)
-	mv liblist.so $(LIB_PATH)
-	cp include/list.h $(INCLUDE_PATH)
+	@mkdir -p $(INCLUDE_PATH)
+	@mv liblist.a $(LIB_PATH)
+	@mv liblist.so $(LIB_PATH)
+	@mv liblist.dylib $(LIB_PATH)
+	@cp include/list.h $(INCLUDE_PATH)
+	@echo "Lib installed. Use 'ldconfig' or 'update_dyld_shared_cache' to \
+	refresh ld cache"
 
 uninstall:
-	$(RM) $(LIB_PATH) $(INCLUDE_PATH)
+	@$(RM) $(LIB_PATH)/liblist.a
+	@$(RM) $(LIB_PATH)/liblist.so
+	@$(RM) $(LIB_PATH)/liblist.dylib
+	@$(RM) $(INCLUDE_PATH)/list.h
+	@echo "Lib uninstalled. Use 'ldconfig' or 'update_dyld_shared_cache' to \
+	refresh ld cache"
 
 valgrind:	tests_run
 	valgrind $(VALGRIND_FLAGS) ./unit_tests
 
 clean:
-	$(RM) $(OBJS)
-	$(RM) $(TESTS_OBJS)
-	$(RM) $(shell find . -type f -name '*.gcno')
-	$(RM) $(shell find . -type f -name '*.gcda')
+	@$(RM) $(OBJS)
+	@$(RM) $(TESTS_OBJS)
+	@$(RM) $(shell find . -type f -name '*.gcno')
+	@$(RM) $(shell find . -type f -name '*.gcda')
 
 fclean:	clean
-	$(RM) liblist.so liblist.a
-	$(RM) unit_tests
+	@$(RM) liblist.so liblist.a liblist.dylib
+	@$(RM) unit_tests
 
 re:	fclean	all
