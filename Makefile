@@ -10,16 +10,16 @@ INCLUDE_PATH	:=	/usr/local/include/list
 
 CC				:=	gcc
 CPPFLAGS		:=	-Iinclude/
-CFLAGS 			:=	-Wall -Wextra -Werror -pedantic -ansi -fPIC \
+CFLAGS 			:=	-Wall -Wextra -Werror -pedantic -ansi -fPIC 		 \
 					-fno-delete-null-pointer-checks -fno-strict-overflow \
-					-fno-strict-aliasing -ftrivial-auto-var-init=zero \
-					-Wformat -Wimplicit-fallthrough \
-					-U_FORTIFY_SOURCE -D_GLIBCXX_ASSERTIONS \
+					-fno-strict-aliasing -ftrivial-auto-var-init=zero    \
+					-Wformat -Wimplicit-fallthrough 					 \
+					-U_FORTIFY_SOURCE -D_GLIBCXX_ASSERTIONS 			 \
 					-fstack-protector-strong
 
 ifeq ($(PLATFORM),x86_64)
 	CFLAGS		+=	-fcf-protection=full -Wl,-z,nodlopen -Wl,-z,noexecstack \
-					-Wl,-z,relro -Wl,-z,now -fstack-clash-protection \
+					-Wl,-z,relro -Wl,-z,now -fstack-clash-protection 		\
 					-fstrict-flex-arrays=3 -Wtrampolines
 endif
 
@@ -61,7 +61,7 @@ liblist.a:	$(OBJS)
 	@ar -rcs $@ $(OBJS)
 
 tests_run:	CFLAGS += -g --coverage
-tests_run:	fclean	uninstall	$(OBJS)	$(TESTS_OBJS)
+tests_run:	fclean	$(OBJS)	$(TESTS_OBJS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJS) $(TESTS_OBJS) -o unit_tests -lcriterion
 	@CRITERION_NO_EARLY_EXIT=1 ./unit_tests
 	@gcovr -e tests .
