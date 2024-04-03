@@ -13,12 +13,14 @@ CPPFLAGS		:=	-Iinclude/
 CFLAGS 			:=	-Wall -Wextra -Werror -pedantic -ansi -fPIC \
 					-fno-delete-null-pointer-checks -fno-strict-overflow \
 					-fno-strict-aliasing -ftrivial-auto-var-init=zero \
-					-Wtrampolines -Wformat -Wimplicit-fallthrough \
-					-U_FORTIFY_SOURCE -D_GLIBCXX_ASSERTIONS -Wl,-z,nodlopen \
-					-Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now
+					-Wformat -Wimplicit-fallthrough \
+					-U_FORTIFY_SOURCE -D_GLIBCXX_ASSERTIONS \
+					-fstack-protector-strong
 
 ifeq ($(PLATFORM),x86_64)
-	CFLAGS		+=	-fcf-protection=full
+	CFLAGS		+=	-fcf-protection=full -Wl,-z,nodlopen -Wl,-z,noexecstack \
+					-Wl,-z,relro -Wl,-z,now -fstack-clash-protection \
+					-fstrict-flex-arrays=3 -Wtrampolines
 endif
 
 ifeq ($(PLATFORM),aarch64)
