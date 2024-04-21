@@ -45,11 +45,10 @@ VALGRIND_FLAGS	:=	-s							\
 
 RM				:=	rm -rf
 
-tests/%.o:	CFLAGS = -Wall -Wextra -Werror
-tests/%.o:	tests/%.c
-	@$(CC) $(TESTS_CFLAGS) $(CPPFLAGS) -o $@ -c $<
-
-all:	liblist.a	liblist.so	liblist.dylib
+all:	$(OBJS)
+	$(MAKE) liblist.a
+	$(MAKE) liblist.so
+	$(MAKE) liblist.dylib
 
 liblist.so:	$(OBJS)
 	@$(CC) -shared $(CFLAGS) $(OBJS) -o $@
@@ -59,6 +58,10 @@ liblist.dylib:	$(OBJS)
 
 liblist.a:	$(OBJS)
 	@ar -rcs $@ $(OBJS)
+
+tests/%.o:	CFLAGS = -Wall -Wextra -Werror
+tests/%.o:	tests/%.c
+	@$(CC) $(TESTS_CFLAGS) $(CPPFLAGS) -o $@ -c $<
 
 tests_run:	CFLAGS += -g --coverage
 tests_run:	fclean	$(OBJS)	$(TESTS_OBJS)
