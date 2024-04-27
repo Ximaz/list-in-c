@@ -7,7 +7,7 @@
 
 #include "list.h"
 
-int list_reverse_into(list_t const *list, list_t *output)
+int list_reverse_into(const list_t *list, list_t *output)
 {
     int abort = 0;
     list_elem_t *tail = list->elems_tail;
@@ -19,17 +19,14 @@ int list_reverse_into(list_t const *list, list_t *output)
     return abort;
 }
 
-list_t *list_reverse(list_t const *list)
+list_t *list_reverse(const list_t *list)
 {
     list_t *new_list = list_new(list->destroy);
 
-    if (NULL == new_list)
-        return NULL;
-    if (-1 == list_reverse_into(list, new_list)) {
-        list_destroy(new_list);
-        return NULL;
-    }
-    return new_list;
+    if (NULL != new_list && 0 == list_reverse_into(list, new_list))
+        return new_list;
+    list_destroy(new_list);
+    return NULL;
 }
 
 void list_reverse_itself(list_t *list)

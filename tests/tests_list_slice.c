@@ -15,7 +15,7 @@ static void fake_destroy(void *e)
     (void)(e);
 }
 
-static int my_cmp(void const *e1, void const *e2)
+static int my_cmp(const void *e1, const void *e2)
 {
     return e1 == e2 ? 0 : 1;
 }

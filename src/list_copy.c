@@ -7,7 +7,7 @@
 
 #include "list.h"
 
-int list_copy_into(list_t const *list, list_t *output)
+int list_copy_into(const list_t *list, list_t *output)
 {
     list_elem_t *tmp = list->elems_head;
 
@@ -19,7 +19,7 @@ int list_copy_into(list_t const *list, list_t *output)
     return 0;
 }
 
-list_t *list_copy(list_t const *list)
+list_t *list_copy(const list_t *list)
 {
     list_t *output = list_new(list->destroy);
 
@@ -28,8 +28,7 @@ list_t *list_copy(list_t const *list)
     return output;
 }
 
-int list_deep_copy_into(list_t const *list, list_copy_t copy,
-    list_t *output)
+int list_deep_copy_into(const list_t *list, list_copy_t copy, list_t *output)
 {
     list_elem_t *tmp = list->elems_head;
 
@@ -43,8 +42,8 @@ int list_deep_copy_into(list_t const *list, list_copy_t copy,
     return 0;
 }
 
-list_t *list_deep_copy(list_t const *list, list_copy_t copy,
-    list_elem_destroy_t destroy)
+list_t *list_deep_copy(const list_t *list, list_copy_t copy,
+    list_destroy_t destroy)
 {
     list_t *output = list_new(NULL == destroy ? list->destroy : destroy);
 

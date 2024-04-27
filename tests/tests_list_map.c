@@ -17,21 +17,21 @@ typedef struct s_string {
     size_t len;
 } string_t;
 
-static void *map(void const *e)
+static void *map(const void *e)
 {
     char const *s = e;
     unsigned long long length = write(STDOUT_FILENO, e, strlen(s));
     return (void *) length;
 }
 
-static int my_strcmp(void const *e1, void const *e2)
+static int my_strcmp(const void *e1, const void *e2)
 {
     string_t const *s1 = e1;
     string_t const *s2 = e2;
     return strncmp(s1->str, s2->str, s1->len);
 }
 
-static void *map_str(void const *e)
+static void *map_str(const void *e)
 {
     char const *s = e;
     string_t *string = calloc(1, sizeof(string_t));
@@ -47,7 +47,7 @@ static void free_str(void *e)
     free(s);
 }
 
-static int my_cmp(void const *a, void const *b)
+static int my_cmp(const void *a, const void *b)
 {
     return !(a == b);
 }

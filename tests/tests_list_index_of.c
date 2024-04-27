@@ -11,7 +11,7 @@
 #include <criterion/new/assert.h>
 #include "list.h"
 
-static int my_strcmp(void const *s1, void const *s2)
+static int my_strcmp(const void *s1, const void *s2)
 {
     return strcmp((char const *) s1, (char const *) s2);
 }

@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include "list.h"
 
-static int sort(void const *e1, void const *e2)
+static int sort(const void *e1, const void *e2)
 {
     return (long long) e1 - (long long) e2;
 }

@@ -7,7 +7,7 @@
 
 #include "list.h"
 
-long list_count(list_t const *list)
+long list_count(const list_t *list)
 {
     return list->count;
 }

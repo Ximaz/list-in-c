@@ -7,7 +7,6 @@
 
 #include "list.h"
 #include <stdlib.h>
-#include <stdio.h>
 
 static list_elem_t *move_to(list_elem_t *node, long range)
 {
@@ -18,7 +17,7 @@ static list_elem_t *move_to(list_elem_t *node, long range)
     return node;
 }
 
-static int convert_indexes(list_t const *list, long *from, long *to)
+static int convert_indexes(const list_t *list, long *from, long *to)
 {
     if (0 > *from)
         *from += list->count;
@@ -29,7 +28,7 @@ static int convert_indexes(list_t const *list, long *from, long *to)
     return 0;
 }
 
-int list_slice_into(list_t const *list, long from, long to, list_t *output)
+int list_slice_into(const list_t *list, long from, long to, list_t *output)
 {
     list_elem_t *head = list->elems_head;
 
@@ -44,7 +43,7 @@ int list_slice_into(list_t const *list, long from, long to, list_t *output)
     return 0;
 }
 
-list_t *list_slice(list_t const *list, long from, long to)
+list_t *list_slice(const list_t *list, long from, long to)
 {
     list_t *sliced = NULL;
 

@@ -7,12 +7,12 @@
 
 #include "list.h"
 
-int list_any(list_t const *list, list_filter_t filter)
+int list_any(const list_t *list, list_predicate_t predicate)
 {
     list_elem_t *elem = list->elems_head;
 
     while (NULL != elem) {
-        if (1 == filter(elem->elem))
+        if (1 == predicate(elem->elem))
             return 1;
         elem = elem->next;
     }

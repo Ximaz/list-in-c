@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include "list.h"
 
-list_t *list_new(list_elem_destroy_t destroy)
+list_t *list_new(list_destroy_t destroy)
 {
     list_t *list = malloc(sizeof(list_t));
 

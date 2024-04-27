@@ -5,10 +5,9 @@
 ** list_deep_extend.c
 */
 
-#include <stdio.h>
 #include "list.h"
 
-int list_deep_extend(list_t *output, list_t const *input, list_copy_t copy)
+int list_deep_extend(list_t *output, const list_t *input, list_copy_t copy)
 {
     list_elem_t *input_head = input->elems_head;
 

@@ -11,12 +11,12 @@
 #include <criterion/new/assert.h>
 #include "list.h"
 
-static int any(void const *e1)
+static int any(const void *e1)
 {
     return 2 == (unsigned long long) e1;
 }
 
-static int not_any(void const *e1)
+static int not_any(const void *e1)
 {
     return 5 == (unsigned long long) e1 % 3;
 }

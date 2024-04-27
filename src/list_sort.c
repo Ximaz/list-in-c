@@ -16,7 +16,7 @@ static void list_swap_elem(list_elem_t *a, list_elem_t *b)
     b->elem = tmp;
 }
 
-static list_elem_t *list_seek_to(list_t const *list, int index)
+static list_elem_t *list_seek_to(const list_t *list, int index)
 {
     list_elem_t *head = list->elems_head;
 
@@ -76,19 +76,18 @@ static void quick_sort(list_t *list, int low, int high, list_sort_t sort)
     }
 }
 
-void list_sort_into(list_t const *list, list_sort_t sort, list_t *output)
+void list_sort_into(const list_t *list, list_sort_t sort, list_t *output)
 {
     list_copy_into(list, output);
     quick_sort(output, 0, output->count - 1, sort);
 }
 
-list_t *list_sort(list_t const *list, list_sort_t sort)
+list_t *list_sort(const list_t *list, list_sort_t sort)
 {
     list_t *output = list_new(list->destroy);
 
-    if (NULL == output)
-        return NULL;
-    list_sort_into(list, sort, output);
+    if (NULL != output)
+        list_sort_into(list, sort, output);
     return output;
 }
 

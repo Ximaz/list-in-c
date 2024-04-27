@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include "list.h"
 
-void **list_to_array(list_t const *list, unsigned long elem_size)
+void **list_to_array(const list_t *list, unsigned long elem_size)
 {
     long i = 0;
     void **array = NULL;

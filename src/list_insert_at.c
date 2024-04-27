@@ -12,11 +12,11 @@ static list_elem_t *list_elem_insert(list_elem_t *e, void *elem)
 {
     list_elem_t *new_elem = malloc(sizeof(list_elem_t));
 
-    if (NULL == new_elem)
-        return NULL;
-    new_elem->elem = elem;
-    new_elem->next = e;
-    new_elem->prev = e->prev;
+    if (NULL != new_elem) {
+        new_elem->elem = elem;
+        new_elem->next = e;
+        new_elem->prev = e->prev;
+    }
     return new_elem;
 }
 

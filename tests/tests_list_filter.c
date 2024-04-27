@@ -11,12 +11,12 @@
 #include <unistd.h>
 #include "list.h"
 
-static int filter(void const *e)
+static int filter(const void *e)
 {
     return strlen((char const *) e) < 10;
 }
 
-static int my_strcmp(void const *a, void const *b)
+static int my_strcmp(const void *a, const void *b)
 {
     return strcmp((char const *) a, (char const *) b);
 }

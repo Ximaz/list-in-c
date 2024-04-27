@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include "list.h"
 
-void list_print(list_t const *list)
+void list_print(const list_t *list)
 {
     list_elem_t *head = list->elems_head;
 

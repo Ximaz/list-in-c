@@ -7,12 +7,12 @@
 
 #include "list.h"
 
-int list_all(list_t const *list, list_filter_t filter)
+int list_all(const list_t *list, list_predicate_t predicate)
 {
     list_elem_t *elem = list->elems_head;
 
     while (NULL != elem) {
-        if (0 == filter(elem->elem))
+        if (0 == predicate(elem->elem))
             return 0;
         elem = elem->next;
     }

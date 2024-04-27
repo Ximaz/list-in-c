@@ -12,18 +12,18 @@
 #include <stdio.h>
 #include "list.h"
 
-static void *reduce(void const *acc, void const *current,
+static void *reduce(const void *acc, const void *current,
     long index __attribute__((unused)),
-    list_t const *list __attribute__((unused)))
+    const list_t *list __attribute__((unused)))
 {
     unsigned long long a = (unsigned long long) acc;
     unsigned long long c = (unsigned long long) current;
     return (void *) a + c;
 }
 
-static void *reduce_str(void const *acc, void const *current,
+static void *reduce_str(const void *acc, const void *current,
     long index __attribute__((unused)),
-    list_t const *list __attribute__((unused)))
+    const list_t *list __attribute__((unused)))
 {
     char const *a = acc;
     char const *c = current;

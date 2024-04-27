@@ -12,12 +12,12 @@
 #include "list.h"
 #include <string.h>
 
-static int my_strcmp(void const *e1, void const *e2)
+static int my_strcmp(const void *e1, const void *e2)
 {
     return strcmp((char const *) e1, (char const *) e2);
 }
 
-static void *my_strdup(void const *e)
+static void *my_strdup(const void *e)
 {
     return (void *) strdup((char const *) e);
 }

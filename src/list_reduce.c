@@ -20,8 +20,8 @@ static int list_reduce_setup(list_elem_t **head, void **acc, int *i)
     return 0;
 }
 
-void *list_reduce(list_t const *list, list_reduce_t reduce, void *acc,
-    list_reduce_destroy_t acc_destroy)
+void *list_reduce(const list_t *list, list_reduce_t reduce, void *acc,
+    list_destroy_t acc_destroy)
 {
     int i = 0;
     void *tmp_acc = NULL;

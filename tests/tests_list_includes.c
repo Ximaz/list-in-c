@@ -11,7 +11,7 @@
 #include <criterion/new/assert.h>
 #include "list.h"
 
-static int my_strcmp(void const *s1, void const *s2)
+static int my_strcmp(const void *s1, const void *s2)
 {
     return strcmp((char const *) s1, (char const *) s2);
 }
@@ -39,7 +39,7 @@ Test(list_includes, test_impl_no_f)
     cr_assert(eq(int, 0, list_insert_at(list, (void *) 3, -1)));
     cr_assert(eq(int, 0, list_insert_at(list, (void *) 4, 2)));
     cr_assert(eq(int, 4, list_count(list)));
-    cr_assert(eq(int, 1, list_includes(list, (void const *) 3, NULL)));
-    cr_assert(eq(int, 0, list_includes(list, (void const *) 0, NULL)));
+    cr_assert(eq(int, 1, list_includes(list, (const void *) 3, NULL)));
+    cr_assert(eq(int, 0, list_includes(list, (const void *) 0, NULL)));
     list_destroy(list);
 }

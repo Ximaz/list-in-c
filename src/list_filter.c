@@ -8,7 +8,8 @@
 #include <stdlib.h>
 #include "list.h"
 
-void list_filter_into(list_t const *list, list_filter_t filter, list_t *output)
+void list_filter_into(const list_t *list, list_predicate_t predicate,
+    list_t *output)
 {
     void *data = NULL;
     list_elem_t *elem = list->elems_head;
@@ -16,29 +17,29 @@ void list_filter_into(list_t const *list, list_filter_t filter, list_t *output)
     while (NULL != elem) {
         data = elem->elem;
         elem = elem->next;
-        if (1 == filter(data))
+        if (1 == predicate(data))
             list_push_back(output, data);
     }
 }
 
-list_t *list_filter(list_t const *list, list_filter_t filter)
+list_t *list_filter(const list_t *list, list_predicate_t predicate)
 {
     list_t *output = list_new(list->destroy);
 
     if (NULL == output)
         return NULL;
-    list_filter_into(list, filter, output);
+    list_filter_into(list, predicate, output);
     return output;
 }
 
-void list_filter_itself(list_t *list, list_filter_t filter)
+void list_filter_itself(list_t *list, list_predicate_t predicate)
 {
     list_elem_t *prev = NULL;
     list_elem_t *next = NULL;
     list_elem_t *elem = list->elems_head;
 
     while (NULL != elem) {
-        if (1 == filter(elem->elem)) {
+        if (1 == predicate(elem->elem)) {
             elem = elem->next;
             continue;
         }

@@ -7,7 +7,7 @@
 
 #include "list.h"
 
-long list_index_of(list_t const *list, void const *elem, list_equal_cmp_t cmp)
+long list_index_of(const list_t *list, const void *elem, list_cmp_t cmp)
 {
     long i = 0;
     list_elem_t *e = list->elems_head;

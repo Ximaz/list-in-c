@@ -21,7 +21,7 @@ static int list_equal_address(list_elem_t const *head1,
     return 1;
 }
 
-int list_equal(list_t const *list1, list_t const *list2, list_equal_cmp_t cmp)
+int list_equal(const list_t *list1, const list_t *list2, list_cmp_t cmp)
 {
     list_elem_t const *head1 = list1->elems_head;
     list_elem_t const *head2 = list2->elems_head;

@@ -7,7 +7,7 @@
 
 #include "list.h"
 
-static int list_includes_raw(list_elem_t *e, void const *elem)
+static int list_includes_raw(list_elem_t *e, const void *elem)
 {
     while (NULL != e) {
         if (e->elem == elem)
@@ -17,7 +17,7 @@ static int list_includes_raw(list_elem_t *e, void const *elem)
     return 0;
 }
 
-int list_includes(list_t const *list, void const *elem, list_equal_cmp_t cmp)
+int list_includes(const list_t *list, const void *elem, list_cmp_t cmp)
 {
     list_elem_t *e = list->elems_head;
 

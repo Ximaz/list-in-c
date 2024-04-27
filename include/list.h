@@ -15,7 +15,7 @@
  *
  * @param[in] elem
  */
-typedef void (*list_elem_destroy_t)(void *elem);
+typedef void (*list_destroy_t)(void *elem);
 
 typedef struct s_list_elem {
     void *elem;
@@ -25,14 +25,78 @@ typedef struct s_list_elem {
 
 typedef struct s_list {
     long count;
-    list_elem_destroy_t destroy;
+    list_destroy_t destroy;
     list_elem_t *elems_head;
     list_elem_t *elems_tail;
 } list_t;
 
+/**
+ * @brief Predicate functions to act on the element depending on the context
+ *
+ * @param[in] elem
+ * @return 0 to operate, non-0 to ignore
+ */
+typedef int (*list_predicate_t)(const void *elem);
+
+/**
+ * @brief Function usd to duplicate the memory of an element
+ *
+ * @param[in] elem
+ */
+typedef void *(*list_copy_t)(const void *elem);
+
+/**
+ * @brief This function type will be used to compare two elements
+ *
+ * Two elements will be considered equals if a call to this function returns
+ * 0.
+ *
+ * @param[in] expected the element to find the index of
+ * @param[in] elem the current element
+ */
+typedef int (*list_cmp_t)(const void *expected, const void *elem);
+
+/**
+ * @brief This function shoud be able to transform (or not) an element
+ *
+ * @param[in] elem
+ * @return The new element
+ */
+typedef void *(*list_map_t)(const void *elem);
+
+/**
+ * @brief This function should be able to reduce two elements in one
+ *
+ * @param[in] acc the accumulator
+ * @param[in] elem the element to reduce
+ * @param[in] index the index of the 'elem'
+ * @param[in] list the list that holds the 'elem' at 'index'
+ * @return The new accumulator / last value to store
+ */
+typedef void *(*list_reduce_t)(const void *acc, const void *elem, long index,
+    const list_t *list);
+
+/**
+ * @brief Modifies the existing element
+ */
+typedef void (*list_apply_t)(void *elem);
+
+/**
+ * @brief This function should return the difference between elem_a and elem_b.
+ *
+ * If (elem_a - elem_b) < 0 then elem_a is considered < to elem_b
+ * If (elem_a - elem_b) == 0 then elem_a is considered == to elem_b
+ * If (elem_a - elem_b) > 0 then elem_a is considered > to elem_b
+ *
+ * @param[in] elem_a
+ * @param[in] elem_b
+ * @return elem_a - elem_b
+*/
+typedef int (*list_sort_t)(const void *elem_a, const void *elem_b);
+
 /* Constructor & Destructor */
 
-list_t *list_new(list_elem_destroy_t destroy);
+list_t *list_new(list_destroy_t destroy);
 
 void list_destroy(list_t *list);
 
@@ -45,7 +109,7 @@ void list_destroy(list_t *list);
  * @return The new list on success, NULL on error
  */
 list_t *array_to_list(void *const *const array, long size,
-    list_elem_destroy_t destroy);
+    list_destroy_t destroy);
 
 /**
  * @brief Transforms a list to a generic array
@@ -53,7 +117,7 @@ list_t *array_to_list(void *const *const array, long size,
  * @param[in] list The list to convert to an array
  * @return heap-allocated array on success, NULL otherwise
  */
-void **list_to_array(list_t const *list, unsigned long elem_size);
+void **list_to_array(const list_t *list, unsigned long elem_size);
 
 /* Getters */
 
@@ -62,18 +126,7 @@ void **list_to_array(list_t const *list, unsigned long elem_size);
  *
  * @param[in] list
  */
-long list_count(list_t const *list);
-
-/**
- * @brief This function type will be used to compare two elements
- *
- * Two elements will be considered equals if a call to this function returns
- * 0.
- *
- * @param[in] expected the element to find the index of
- * @param[in] elem the current element
- */
-typedef int (*list_equal_cmp_t)(void const *expected, void const *elem);
+long list_count(const list_t *list);
 
 /**
  * @brief Returns the index of an element
@@ -82,7 +135,7 @@ typedef int (*list_equal_cmp_t)(void const *expected, void const *elem);
  * @param[in] elem
  * @param[in] cmp the function to compare elements with
  */
-long list_index_of(list_t const *list, void const *elem, list_equal_cmp_t cmp);
+long list_index_of(const list_t *list, const void *elem, list_cmp_t cmp);
 
 /**
  * @brief Returns the element for the given index
@@ -91,7 +144,7 @@ long list_index_of(list_t const *list, void const *elem, list_equal_cmp_t cmp);
  * @param[in] index
  * @return the element on success, NULL on error (Out-Of-Range)
  */
-void *list_value_at(list_t const *list, long index);
+void *list_value_at(const list_t *list, long index);
 
 /* Operators */
 
@@ -106,7 +159,7 @@ void *list_value_at(list_t const *list, long index);
  * @param[in] cmp the function to compare elements with (may be NULL)
  * @return 1 if equal, 0 otherwise
  */
-int list_equal(list_t const *list1, list_t const *list2, list_equal_cmp_t cmp);
+int list_equal(const list_t *list1, const list_t *list2, list_cmp_t cmp);
 
 /* Insertion */
 
@@ -184,7 +237,7 @@ void *list_pop_back(list_t *list);
 /**
  * @brief Removes all the elements of the list
  *
- * Uses the list_elem_destroy_t function passed upon initialization
+ * Uses the list_destroy_t function passed upon initialization
  *
  * @param[in] list
  */
@@ -196,7 +249,7 @@ void list_clear(list_t *list);
  * @param[in] list
  * @return the reversed list in success, NULL otherwise
  */
-list_t *list_reverse(list_t const *list);
+list_t *list_reverse(const list_t *list);
 
 /**
  * @brief Reverse the current list itself, no allocation of any kind
@@ -212,7 +265,7 @@ void list_reverse_itself(list_t *list);
  * @param[out] output
  * @return 0 on success, -1 otherwise
  */
-int list_reverse_into(list_t const *list, list_t *output);
+int list_reverse_into(const list_t *list, list_t *output);
 
 /**
  * @brief Slices a list from 'from' to 'to' (excluded) into a new allocated one
@@ -221,7 +274,7 @@ int list_reverse_into(list_t const *list, list_t *output);
  * @param[in] from
  * @param[in] to (excluded)
  */
-list_t *list_slice(list_t const *list, long from, long to);
+list_t *list_slice(const list_t *list, long from, long to);
 
 /**
  * @brief Slices the current list itself, no allocation of any kind. All
@@ -244,22 +297,14 @@ int list_slice_itself(list_t *list, long from, long to);
  * @param[out] output
  * @return 0 on success, -1 otherwise (Out-Of-Range)
  */
-int list_slice_into(list_t const *list, long from, long to,
-    list_t *output);
-
-/**
- * @brief Function usd to duplicate the memory of an element
- *
- * @param[in] elem
- */
-typedef void *(*list_copy_t)(void const *elem);
+int list_slice_into(const list_t *list, long from, long to, list_t *output);
 
 /**
  * @brief Copies the current list into a new allocated one
  *
  * @param[in] list
  */
-list_t *list_copy(list_t const *list);
+list_t *list_copy(const list_t *list);
 
 /**
  * @brief Copies the current list into the output one
@@ -268,7 +313,7 @@ list_t *list_copy(list_t const *list);
  * @param[out] output
  * @return 0 on success, -1 otherwise
  */
-int list_copy_into(list_t const *list, list_t *output);
+int list_copy_into(const list_t *list, list_t *output);
 
 /**
  * @brief Deeply copies the current list into a new allocated one
@@ -280,8 +325,8 @@ int list_copy_into(list_t const *list, list_t *output);
  * @param[in] copy the copy function used to duplicate elements
  * @param[in] destroy the destroy element function to pass to the new list
  */
-list_t *list_deep_copy(list_t const *list, list_copy_t copy,
-    list_elem_destroy_t destroy);
+list_t *list_deep_copy(const list_t *list, list_copy_t copy,
+    list_destroy_t destroy);
 
 /**
  * @brief Deeply copies the current list into the output one
@@ -294,20 +339,10 @@ list_t *list_deep_copy(list_t const *list, list_copy_t copy,
  * @param[out] output
  * @return 0 on success, -1 otherwise
  */
-int list_deep_copy_into(list_t const *list, list_copy_t copy,
+int list_deep_copy_into(const list_t *list, list_copy_t copy,
     list_t *output);
 
 /* Functionnal functions */
-
-/**
- * @brief This function shoud be able to transform (or not) an element
- *
- * @param[in] elem
- * @return The new element
- */
-typedef void *(*list_map_t)(void const *elem);
-
-typedef list_elem_destroy_t list_map_destroy_t;
 
 /**
  * @brief Maps each elements of the list into a new allocated one
@@ -316,8 +351,8 @@ typedef list_elem_destroy_t list_map_destroy_t;
  * @param[in] map
  * @param[in] destroy the function to destroy generated map elements
  */
-list_t *list_map(list_t const *list, list_map_t map,
-    list_map_destroy_t destroy);
+list_t *list_map(const list_t *list, list_map_t map,
+    list_destroy_t destroy);
 
 /**
  * @brief Maps each elements of the list into itself
@@ -326,7 +361,7 @@ list_t *list_map(list_t const *list, list_map_t map,
  * @param[in] map
  * @param[in] destroy the function to destroy generated map elements
  */
-void list_map_itself(list_t *list, list_map_t map, list_map_destroy_t destroy);
+void list_map_itself(list_t *list, list_map_t map, list_destroy_t destroy);
 
 /**
  * @brief Maps each elements of the list into output
@@ -335,64 +370,33 @@ void list_map_itself(list_t *list, list_map_t map, list_map_destroy_t destroy);
  * @param[in] map
  * @param[out] output
  */
-void list_map_into(list_t const *list, list_map_t map, list_t *output);
-
-/**
- * @brief This function shoud be able to filter elements
- *
- * @param[in] elem
- * @return 0 (exclude) or 1 (include)
- */
-typedef int (*list_filter_t)(void const *elem);
+void list_map_into(const list_t *list, list_map_t map, list_t *output);
 
 /**
  * @brief This function filters all the elements of the list into a new one
  *
  * @param[in] list
- * @param[in] filter
+ * @param[in] predicate
  */
-list_t *list_filter(list_t const *list, list_filter_t filter);
+list_t *list_filter(const list_t *list, list_predicate_t predicate);
 
 /**
  * @brief This function filters all the elements of the list into itself
  *
  * @param[in] list
- * @param[in] filter
+ * @param[in] predicate
  */
-void list_filter_itself(list_t *list, list_filter_t filter);
+void list_filter_itself(list_t *list, list_predicate_t predicate);
 
 /**
  * @brief This function filters all the elements of the list into output
  *
  * @param[in] list
- * @param[in] filter
+ * @param[in] predicate
  * @param[out] output
  */
-void list_filter_into(list_t const *list, list_filter_t filter,
+void list_filter_into(const list_t *list, list_predicate_t predicate,
     list_t *output);
-
-/**
- * @brief This function should be able to reduce two elements in one
- *
- * @param[in] acc the accumulator
- * @param[in] elem the element to reduce
- * @param[in] index the index of the 'elem'
- * @param[in] list the list that holds the 'elem' at 'index'
- * @return The new accumulator / last value to store
- */
-typedef void *(*list_reduce_t)(void const *acc, void const *elem, long index,
-    list_t const *list);
-
-/**
- * @brief This function is responsible for freeing the memory of the previous
- * heap-allocated accumulator, if needed. If you don't need this, pass it as
- * `NULL`. If `NULL` is passed, then the default `destroy` of the list
- * will be used. If this function is also `NULL`, the allocator is considered
- * as stack-allocated, thus nothing happens.
- *
- * @param[in] acc
- */
-typedef void (*list_reduce_destroy_t)(void *acc);
 
 /**
  * @brief This function reduces all the elements of a list into a single one
@@ -402,23 +406,10 @@ typedef void (*list_reduce_destroy_t)(void *acc);
  * @param[in] acc [OPT] the starting accumulator. if NULL, 1st elem of the list
  * @param[in] acc_destroy [OPT] the previous accumulator destroyer
  */
-void *list_reduce(list_t const *list, list_reduce_t reduce, void *acc,
-    list_reduce_destroy_t acc_destroy);
+void *list_reduce(const list_t *list, list_reduce_t reduce, void *acc,
+    list_destroy_t acc_destroy);
 
 /* Algorithm */
-
-/**
- * @brief This function should return the difference between elem_a and elem_b.
- *
- * If (elem_a - elem_b) < 0 then elem_a is considered < to elem_b
- * If (elem_a - elem_b) == 0 then elem_a is considered == to elem_b
- * If (elem_a - elem_b) > 0 then elem_a is considered > to elem_b
- *
- * @param[in] elem_a
- * @param[in] elem_b
- * @return elem_a - elem_b
-*/
-typedef int (*list_sort_t)(void const *elem_a, void const *elem_b);
 
 /**
  * @brief Sorts all the elements of the list into output
@@ -427,7 +418,7 @@ typedef int (*list_sort_t)(void const *elem_a, void const *elem_b);
  * @param[in] sort
  * @param[out] output
  */
-void list_sort_into(list_t const *list, list_sort_t sort, list_t *output);
+void list_sort_into(const list_t *list, list_sort_t sort, list_t *output);
 
 /**
  * @brief Sorts all the elements of the list into a new allocated one
@@ -435,7 +426,7 @@ void list_sort_into(list_t const *list, list_sort_t sort, list_t *output);
  * @param[in] list
  * @param[in] sort
  */
-list_t *list_sort(list_t const *list, list_sort_t sort);
+list_t *list_sort(const list_t *list, list_sort_t sort);
 
 /**
  * @brief Sorts all the elements of the list into itself
@@ -451,7 +442,7 @@ void list_sort_itself(list_t *list, list_sort_t sort);
  *
  * @param[in] list
  */
-void list_print(list_t const *list);
+void list_print(const list_t *list);
 
 /**
  * @brief Returns whether or not the list includes an element.
@@ -461,27 +452,27 @@ void list_print(list_t const *list);
  * @param[in] cmp the function to compare elements with (may be NULL)
  * @return 1 if list includes the elem, 0 otherwise
  */
-int list_includes(list_t const *list, void const *elem, list_equal_cmp_t cmp);
+int list_includes(const list_t *list, const void *elem, list_cmp_t cmp);
 
 /**
  * @brief Returns whether or not all elements respect a certain condition
  *
  * @param[in] list
  * @param[in] elem
- * @param[in] filter the function validating an element
+ * @param[in] predicate
  * @return 1 if all elements are validated, 0 otherwise
  */
-int list_all(list_t const *list, list_filter_t filter);
+int list_all(const list_t *list, list_predicate_t predicate);
 
 /**
  * @brief Returns whether or not any element respects a certain condition
  *
  * @param[in] list
  * @param[in] elem
- * @param[in] filter the function validating an element
+ * @param[in] predicate
  * @return 1 if any element is validated, 0 otherwise
  */
-int list_any(list_t const *list, list_filter_t filter);
+int list_any(const list_t *list, list_predicate_t predicate);
 
 /**
  * @brief Extends the output list from the input list
@@ -493,7 +484,7 @@ int list_any(list_t const *list, list_filter_t filter);
  * @param[in] input
  * @returns 0 on success, -1 on error
  */
-int list_extend(list_t *output, list_t const *input);
+int list_extend(list_t *output, const list_t *input);
 
 /**
  * @brief Deeply extends the output list from the input list
@@ -506,12 +497,7 @@ int list_extend(list_t *output, list_t const *input);
  * @param[in] copy may be NULL, calling list_extend instead
  * @returns 0 on success, -1 on error
  */
-int list_deep_extend(list_t *output, list_t const *input, list_copy_t copy);
-
-/**
- * @brief Modifies the existing element
- */
-typedef void (*list_apply_t)(void *elem);
+int list_deep_extend(list_t *output, const list_t *input, list_copy_t copy);
 
 /**
  * @brief Applies a function to each elements of the list
