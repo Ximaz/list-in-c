@@ -131,7 +131,7 @@ jobs:
             -   name: "Run Valgrind"
                 uses: "Ximaz/valgrind-action@v1.2.0"
                 with:
-                    binary_path: "./${{ env.UNIT_TESTS }}"
+                    binary_path: "${{ env.UNIT_TESTS }}"
 
     check-mirror-commits:
         runs-on: "ubuntu-latest"
