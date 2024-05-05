@@ -5,9 +5,9 @@ on:
 
 env:
     UNIT_TESTS: "./unit_tests"
-    VALGRIND_REPORTS: "./valgrind-reports.log"
     ARTIFACTS: "${{ vars.ARTIFACTS }}"
     MIRROR_URL: "${{ vars.MIRROR_URL }}"
+    VALGRIND_SUPPRESSIONS: "${{ vars.VALGRIND_SUPPRESSIONS }}"
     SSH_PRIVATE_KEY: "${{ secrets.SSH_PRIVATE_KEY }}"
     SSH_PRIVATE_KEY_PASSPHRASE: "${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}"
 
@@ -128,29 +128,10 @@ jobs:
                 timeout-minutes: 1
                 run: "[[ $(grep -E \"^tests_run:\" Makefile) == \"\" ]] && exit 0 || make tests_run"
 
-            -   name: "Run valgrind"
-                run: "[ -f \"${{ env.UNIT_TESTS }}\" ] && valgrind -s --leak-check=full --track-origins=yes --read-var-info=yes --trace-children=yes --show-leak-kinds=all --read-inline-info=yes --errors-for-leak-kinds=all ${{ env.UNIT_TESTS }} 2>${{ env.VALGRIND_REPORTS }}"
-
-            -   name: "Analyze valgrind report"
-                run: |
-                    [ ! -f "${{ env.VALGRIND_REPORTS }}" ] && exit 0
-                    status=0
-                    block=""
-                    while IFS= read -r line; do
-                        if [[ "${block}" != "" ]]; then
-                            if [[ $(echo "${line}" | grep '^==.*== $') ]]; then
-                                echo "::error title=Valgrind Error::${block}"
-                                block=""
-                                status=1
-                            else
-                                block="${block}%0A${line}"
-                            fi
-                        fi
-                        if [[ $(echo "${line}" | grep '^==.*== .* bytes in .* blocks are definitely lost in loss record .* of .*$') ]]; then
-                            block="${line}"
-                        fi
-                    done < ${{ env.VALGRIND_REPORTS }}
-                    exit "${status}"
+            -   name: "Run Valgrind"
+                uses: "Ximaz/valgrind-action@v1.2.0"
+                with:
+                    binary_path: "./${{ env.UNIT_TESTS }}"
 
     check-mirror-commits:
         runs-on: "ubuntu-latest"
